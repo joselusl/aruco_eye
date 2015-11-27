@@ -1,0 +1,27 @@
+<!-- Launcher: aruco_eye_ros -->
+<launch>
+	
+	<arg name="aruco_eye_ros_node_name" 	default="aruco_eye_ros_node" />
+
+  <arg name="aruco_list_file"/>
+  <arg name="camera_calibration_file"/>
+
+  <arg name="aruco_detector_frame_name" default="aruco_detector"/>
+
+  <arg name="image_topic_name" 	default="image_raw" />
+  <arg name="aruco_list_topic_name" 	default="arucoObservation" />
+
+
+	<node name="$(arg aruco_eye_ros_node_name)" pkg="aruco_eye_ros" type="aruco_eye_ros" output="screen">
+
+    <param name="aruco_list_file" value="$(arg aruco_list_file)" type="string"/>
+    <param name="camera_calibration_file" value="$(arg camera_calibration_file)" type="string"/>
+
+    <param name="aruco_detector_frame_name" value="$(arg aruco_detector_frame_name)" type="string"/>
+
+    <param name="image_topic_name" value="$(arg image_topic_name)" type="string"/>
+    <param name="aruco_list_topic_name" value="$(arg aruco_list_topic_name)" type="string"/>
+
+	</node>
+
+</launch>

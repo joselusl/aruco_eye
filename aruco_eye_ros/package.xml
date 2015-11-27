@@ -1,0 +1,27 @@
+<package>
+	<name>aruco_eye_ros</name>
+	<version>1.0.0</version>
+	<description>
+  		This package is aruco_eye_ros.
+	</description>
+	<author email="jl.sanchez@upm.es">Jose Luis Sanchez-Lopez</author>
+	<maintainer email="jl.sanchez@upm.es">Jose Luis Sanchez-Lopez</maintainer>
+  	<license>BSD</license>
+	<url>http://ros.org/wiki/aruco_eye_ros</url>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+	<build_depend>image_transport</build_depend>
+	<build_depend>cv_bridge</build_depend>
+	<build_depend>aruco_eye_msgs</build_depend>
+	<build_depend>aruco_eye</build_depend>
+
+	<run_depend>roscpp</run_depend>
+	<run_depend>image_transport</run_depend>
+	<run_depend>cv_bridge</run_depend>
+	<run_depend>aruco_eye_msgs</run_depend>
+	<run_depend>aruco_eye</run_depend>
+ 
+</package>
+
