@@ -50,7 +50,7 @@ int ArucoCodeDefinition::setArucoCode(int idIn, double sizeIn)
         size=sizeIn;
         flagSizeSet=true;
     }
-    return 1;
+    return 0;
 }
 
 int ArucoCodeDefinition::getId() const
@@ -88,7 +88,7 @@ ArucoListDefinition::~ArucoListDefinition()
 
 int ArucoListDefinition::loadListFromXmlFile(std::string filePath)
 {
-    int noError=1;
+    int error=0;
 
     //XML document
     pugi::xml_document doc;
@@ -98,7 +98,7 @@ int ArucoListDefinition::loadListFromXmlFile(std::string filePath)
     if(!result)
     {
         cout<<"I cannot open xml file: "<<filePath<<endl;
-        return 0;
+        return 1;
     }
 
 
@@ -136,11 +136,11 @@ int ArucoListDefinition::loadListFromXmlFile(std::string filePath)
         }
         else
         {
-            noError=0;
+            error=2;
         }
     }
 
-    return noError;
+    return error;
 }
 
 
@@ -186,16 +186,16 @@ int ArucoListDefinition::getCodeSizeById(double &sizeCode, int idCode)
             if(ArucoListDefinitionCodes[i].isSizeSet())
             {
                 sizeCode=ArucoListDefinitionCodes[i].getSize();
-                return 1;
+                return 0;
             }
             else
             {
                 sizeCode=-1.0;
-                return 0;
+                return 1;
             }
         }
     }
-    return 0;
+    return 2;
 }
 
 int ArucoListDefinition::getCodeSize(double &sizeCode, unsigned int codePosition)
@@ -203,14 +203,14 @@ int ArucoListDefinition::getCodeSize(double &sizeCode, unsigned int codePosition
     if(codePosition<ArucoListDefinitionCodes.size())
     {
         sizeCode=ArucoListDefinitionCodes[codePosition].getSize();
-        return 1;
+        return 0;
     }
     else
     {
         sizeCode=-1.0;
-        return 0;
+        return 1;
     }
-    return 0;
+    return 2;
 }
 
 
@@ -233,7 +233,7 @@ aruco::Marker ArucoMarker::getMarker() const
 int ArucoMarker::setMarker(aruco::Marker& TheMarker)
 {
     this->TheMarker=TheMarker;
-    return 1;
+    return 0;
 }
 
 bool ArucoMarker::is3DReconstructed() const
@@ -244,7 +244,7 @@ bool ArucoMarker::is3DReconstructed() const
 int ArucoMarker::set3DReconstructed(bool flag3DReconstructed)
 {
     this->flag3DReconstructed=flag3DReconstructed;
-    return 1;
+    return 0;
 }
 
 
@@ -268,52 +268,88 @@ int ArucoEye::init()
 {
     flagNewImage=false;
 
-    if(!configureArucoDetector())
-        return 0;
+    if(configureArucoDetector())
+        return 1;
 
-    return 1;
+    return 0;
 }
 
 int ArucoEye::close()
 {
-    return 1;
+    return 0;
 }
 
 
 int ArucoEye::configure(std::string arucoListFile, std::string cameraParametersFile)
 {
+    int error=0;
 
     //Camera parameters
-    if(!setCameraParameters(cameraParametersFile))
+    if(setCameraParameters(cameraParametersFile))
     {
-        return 0;
+        error=2;
     }
 
     //Aruco List
-    if(!setArucoList(arucoListFile))
-        return 0;
+    if(setArucoList(arucoListFile))
+        error=3;
 
 
     //Aruco Detector
-    if(!configureArucoDetector())
-        return 0;
+    if(configureArucoDetector())
+        error=3;
 
 
 
-    return 1;
+    return error;
 }
 
+bool ArucoEye::isTheCameraParametersSet()
+{
+    return this->flagCameraParametersSet;
+}
 
 int ArucoEye::setCameraParameters(std::string filename)
 {
-    TheCameraParameters.readFromXMLFile(filename);
+    if ( !boost::filesystem::exists( filename ) )
+    {
+        std::cout << "Can't find the file: "<< filename << std::endl;
+        return 1;
+    }
+    else
+    {
+        TheCameraParameters.readFromXMLFile(filename);
+        {
+            flagCameraParametersSet=true;
+            return 0;
+        }
+        return 1;
+    }
+    return 2;
+}
+
+
+int ArucoEye::setCameraParameters(aruco::CameraParameters camParam)
+{
+    TheCameraParameters=camParam;
+    if(TheCameraParameters.isValid())
+    {
+        flagCameraParametersSet=true;
+        return 0;
+    }
     return 1;
 }
 
 
 int ArucoEye::setArucoList(std::string arucoListFile)
 {
-    return ArucoList.loadListFromXmlFile(arucoListFile);
+    if ( !boost::filesystem::exists( arucoListFile ) )
+    {
+        std::cout << "Can't find the file: "<< arucoListFile << std::endl;
+        return 1;
+    }
+    else
+        return ArucoList.loadListFromXmlFile(arucoListFile);
 }
 
 
@@ -350,7 +386,7 @@ int ArucoEye::configureArucoDetector(bool enableErosion, aruco::MarkerDetector::
     //@param max size of the contour to consider a possible marker as valid [0,1)
     MDetector.setMinMaxSize(minSize,maxSize);
 
-    return 1;
+    return 0;
 }
 
 
@@ -359,10 +395,10 @@ int ArucoEye::run(unsigned int &numCodesDetected, unsigned int &numCodesReconstr
 {
     //Checks
     if(!flagNewImage)
-        return 0;
+        return 1;
 
     if(InputImage.size().height==0 || InputImage.size().width==0)
-        return 0;
+        return 2;
 
     //Detection of markers in the image passed
     std::vector<aruco::Marker> TheDetectedMarkers;
@@ -391,7 +427,7 @@ int ArucoEye::run(unsigned int &numCodesDetected, unsigned int &numCodesReconstr
                 if(TheCameraParameters.isValid())
                 {
                     double theMarkerSize;
-                    if(ArucoList.getCodeSizeById(theMarkerSize, TheDetectedMarkers[i].id))
+                    if(!ArucoList.getCodeSizeById(theMarkerSize, TheDetectedMarkers[i].id))
                     {
                         TheDetectedMarkers[i].calculateExtrinsics(theMarkerSize,TheCameraParameters);
                         TheArucoMarker.set3DReconstructed(true);
@@ -415,7 +451,7 @@ int ArucoEye::run(unsigned int &numCodesDetected, unsigned int &numCodesReconstr
 
     flagNewImage=false;
 
-    return 1;
+    return 0;
 }
 
 int ArucoEye::drawDetectedArucoCodes(bool drawDetectedCodes, bool draw3DReconstructedCodes)
@@ -424,7 +460,7 @@ int ArucoEye::drawDetectedArucoCodes(bool drawDetectedCodes, bool draw3DReconstr
 
     //Checks
     if(InputImage.size().height==0 || InputImage.size().width==0)
-        return 0;
+        return 1;
 
 
     //Copy
@@ -458,8 +494,17 @@ int ArucoEye::drawDetectedArucoCodes(bool drawDetectedCodes, bool draw3DReconstr
         }
     }
 
-    return 1;
+    return 0;
 
+}
+
+char ArucoEye::displayDetectedArucoCodes(std::string windowName, int waitingTime)
+{
+    //show input with augmented information and  the thresholded image
+    cv::imshow(windowName,OutputImage);
+
+    //end
+    return cv::waitKey(waitingTime);//wait for key to be pressed
 }
 
 
@@ -469,12 +514,8 @@ char ArucoEye::drawAndDisplayDetectedArucoCodes(std::string windowName, int wait
     if(!drawDetectedArucoCodes(drawDetectedCodes, draw3DReconstructedCodes))
         return '0';
 
-
-    //show input with augmented information and  the thresholded image
-    cv::imshow(windowName,OutputImage);
-
-    //end
-    return cv::waitKey(waitingTime);//wait for key to be pressed
+    // Display
+    return displayDetectedArucoCodes(windowName, waitingTime);
 }
 
 
@@ -483,367 +524,20 @@ int ArucoEye::setInputImage(cv::Mat InputImageIn)
 {
     flagNewImage=true;
     InputImageIn.copyTo(InputImage);
-    return 1;
+    return 0;
 }
 
 
 int ArucoEye::getOutputImage(cv::Mat &OutputImageOut)
 {
     OutputImage.copyTo(OutputImageOut);
-    return 1;
+    return 0;
 }
 
 
 int ArucoEye::getMarkersList(std::vector<ArucoMarker> &TheMarkers3D)
 {
     TheMarkers3D=TheMarkers;
-    return 1;
+    return 0;
 }
-
-
-
-
-
-
-
-
-////////////////////// homogeneusTransformation ////////////////////////////
-int homogeneusTransformation::createMatHomogFromVecs(cv::Mat& MatHomog, cv::Mat TransVec, cv::Mat RotVec)
-{
-	//MatHomog.create(Size(4,4),CV_64F);
-    MatHomog=cv::Mat::zeros(4,4,CV_32F);
-	
-	
-	//
-    cv::Mat RotMat;
-	cv::Rodrigues(RotVec,RotMat);
-	
-	//cout<<RotMat<<endl;
-	
-	
-	//Rotations
-	/*
-	float roll=RotVec.at<float>(0,0);
-	Mat MatHRoll=Mat::zeros(4,4,CV_32F); 	
-	MatHRoll.at<float>(0,0)=1.0;
-	MatHRoll.at<float>(1,1)=cos(roll); MatHRoll.at<float>(1,2)=-sin(roll);
-	MatHRoll.at<float>(2,1)=sin(roll); MatHRoll.at<float>(2,2)=cos(roll);
-	MatHRoll.at<float>(3,3)=1.0;
-	float pitch=RotVec.at<float>(1,0);
-	Mat MatHPitch=Mat::zeros(4,4,CV_32F); 
-	MatHPitch.at<float>(0,0)=cos(pitch); MatHPitch.at<float>(0,2)=sin(pitch);
-	MatHPitch.at<float>(1,1)=1.0;
-	MatHPitch.at<float>(2,0)=-sin(pitch); MatHPitch.at<float>(2,2)=cos(pitch);
-	MatHPitch.at<float>(3,3)=1.0;
-	float yaw=RotVec.at<float>(2,0);
-	Mat MatHYaw=Mat::zeros(4,4,CV_32F); 
-	MatHYaw.at<float>(0,0)=cos(yaw); MatHYaw.at<float>(0,1)=-sin(yaw);
-	MatHYaw.at<float>(1,0)=sin(yaw); MatHYaw.at<float>(1,1)=cos(yaw);
-	MatHYaw.at<float>(2,2)=1.0;
-	MatHPitch.at<float>(3,3)=1.0;
-	*MatHomog=MatHRoll*MatHPitch*MatHYaw;
-	*/
-	for(int i=0;i<3;i++)
-		for(int j=0;j<3;j++)
-            MatHomog.at<float>(i,j)=RotMat.at<float>(i,j);
-	
-	
-	
-	//Translation
-	for(int i=0;i<3;i++)
-	{
-        MatHomog.at<float>(i,3)=TransVec.at<float>(i,0);
-	}
-	
-	
-	//Scale
-    MatHomog.at<float>(3,3)=1.0;
-	
-	
-	//cout<<*MatHomog<<endl;
-	
-	return 1;
-}
-
-
-
-int homogeneusTransformation::calculateVecsFromMatHomog(cv::Mat& TransVec, cv::Mat& RotVec, cv::Mat MatHomog)
-{
-	
-	//Translation
-    TransVec=cv::Mat::zeros(3,1,CV_32F);
-	for(int i=0;i<3;i++)
-	{
-        TransVec.at<float>(i,0)=MatHomog.at<float>(i,3);
-	}
-	
-	
-	//Rotations
-    RotVec=cv::Mat::zeros(3,1,CV_32F);
-	
-	
-	
-	//Rotacion
-    cv::Mat RotMat=cv::Mat::zeros(3,3,CV_32F);
-	for(int i=0;i<3;i++)
-		for(int j=0;j<3;j++)
-			RotMat.at<float>(i,j)=MatHomog.at<float>(i,j);
-	
-    //cv::Mat AuxRotVec=*RotVec;
-    cv::Rodrigues(RotMat,RotVec);
-	
-
-	return 1;
-}
-
-
-
-int homogeneusTransformation::calculateTraVecYPRFromMatHomog(cv::Mat *YPRVec, cv::Mat *TraVec, cv::Mat MatHomog)
-{
-    //Translation
-    *TraVec=cv::Mat::zeros(3,1,CV_32F);
-    for(int i=0;i<3;i++)
-    {
-        TraVec->at<float>(i,0)=MatHomog.at<float>(i,3);
-    }
-
-
-
-    //Rotation
-    *YPRVec=cv::Mat::zeros(3,1,CV_32F);
-	
-
-
-	float yaw, pitch, roll;
-
-
-    /*
-    ///http://www.euclideanspace.com/maths/geometry/rotations/euler/indexLocal.htm
-    ///http://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToEuler/index.htm
-
-    pitch=asin(MatHomog.at<float>(1,0));
-    if(MatHomog.at<float>(1,0)==1) //North pole
-    {
-        yaw=atan2(MatHomog.at<float>(0,2),MatHomog.at<float>(2,2));
-        roll=0.0;
-    }
-    else if(MatHomog.at<float>(1,0)==-1) //South pole
-    {
-        yaw=atan2(MatHomog.at<float>(0,2),MatHomog.at<float>(2,2));
-        roll=0.0;
-    }
-    else
-    {
-        yaw=atan2(-MatHomog.at<float>(1,2),MatHomog.at<float>(1,1));
-        roll=atan2(-MatHomog.at<float>(2,0),MatHomog.at<float>(0,0));
-    }
-
-
-    //end
-    YPRVec->at<float>(0,0)=yaw;
-    YPRVec->at<float>(1,0)=pitch;
-    YPRVec->at<float>(2,0)=roll;
-
-
-    return 1;
-    */
-
-
-
-
-
-    /*
-    ////http://www.mathworks.es/matlabcentral/fileexchange/24589-kinematics-toolbox/content/kinematics/screws/rpy.m
-    //Pitch
-    float tol=1e-4;
-    if(pow(MatHomog.at<float>(0,0),2) + pow(MatHomog.at<float>(0,1),2) >=tol)
-    {
-        pitch=atan2(MatHomog.at<float>(0,2), sqrt(pow(MatHomog.at<float>(0,0),2) + pow(MatHomog.at<float>(0,1),2))); // mal condicionada si está cerca de pi/2 o -pi/2
-    }
-    else
-    {
-        cout<<"!Mal condicionada pitch\n";
-        pitch=asin(MatHomog.at<float>(0,2));
-    }
-
-
-    //Yaw and Roll
-    float tolPitch=0.0;
-    if(pitch>=PI/2-tolPitch)
-    {
-        //North pole
-        cout<<"!Mal condicionada pitch a\n";
-        roll = 0;
-        yaw = atan2(MatHomog.at<float>(0,1), MatHomog.at<float>(1,1));
-    }
-    else if(pitch<=-PI/2+tolPitch)
-    {
-        //South pole
-        cout<<"!Mal condicionada pitch b\n";
-        roll = 0;
-        yaw = -atan2(MatHomog.at<float>(0,1), MatHomog.at<float>(1,1));
-    }
-    else
-    {
-        //yaw = atan2(MatHomog.at<float>(1,0)/cos(pitch), MatHomog.at<float>(0,0)/cos(pitch));
-        yaw=atan2(-MatHomog.at<float>(0,1),MatHomog.at<float>(0,0));
-        //roll = atan2(MatHomog.at<float>(2,1)/cos(pitch), MatHomog.at<float>(2,2)/cos(pitch));
-        roll=atan2(-MatHomog.at<float>(1,2),MatHomog.at<float>(2,2));
-    }
-
-
-    //
-    YPRVec->at<float>(0,0)=yaw;
-    YPRVec->at<float>(1,0)=pitch;
-    YPRVec->at<float>(2,0)=roll;
-
-
-    return 1;
-    */
-
-
-
-    ///http://en.wikibooks.org/wiki/Robotics_Kinematics_and_Dynamics/Description_of_Position_and_Orientation
-    float tol=1e-4;
-	
-	//Pitch
-    if(pow(MatHomog.at<float>(0,0),2) + pow(MatHomog.at<float>(0,1),2) >=tol)
-	{
-	  float my_sign = MatHomog.at<float>(0,0) > 0 ? 1.0 : -1.0;
-	  pitch=atan2(MatHomog.at<float>(0,2), my_sign*sqrt(pow(MatHomog.at<float>(0,0),2) + pow(MatHomog.at<float>(0,1),2))); // mal condicionada si está cerca de pi/2 o -pi/2
-
-
-	//	if (MatHomog.at<float>(0,2) < 0 && MatHomog.at<float>(0,2) < 0 && MatHomog.at<float>(0,1))
-	
-	  /*
-	cout << "YPR Calculation ........... GOOD Pitch!!!!!!";
-	cout <<  " 0,2= " << MatHomog.at<float>(0,2);
-	cout <<  " 0,0= " << MatHomog.at<float>(0,0);
-	cout <<  " 0,1= " << MatHomog.at<float>(0,1) << endl;
-	  */
-	}
-	else
-	{
-        //TODO
-      cout<<"!Bad conditioning in Pitch. Pitch =+-pi/2" << endl;
-      //pitch = cvg_utils_library::asin_ws(MatHomog.at<float>(0,2));
-      pitch = asin(MatHomog.at<float>(0,2));
-	}
-	
-	
-
-    float tol2=-1e-1;
-
-	//Roll =f(pitch) -> pitch=+-pi/2 || yaw=+-pi/2
-    if(abs(MatHomog.at<float>(2,2))<=tol2)
-	{
-	  cout<<"!Bad conditioning in Roll. Roll =+-pi/2" << endl;
-        //TODO
-		roll=0.0;
-	}
-	else
-	{
-		roll=atan2(-MatHomog.at<float>(1,2),MatHomog.at<float>(2,2));
-	}
-	
-	
-	//Yaw =f(roll)
-    if(abs(MatHomog.at<float>(0,0))<=tol2)
-	{
-	  cout<<"!Bad conditioning in Yaw. Yaw =+-pi/2" << endl;
-        //TODO
-      float aux = (cos(roll)-MatHomog.at<float>(1,1)/MatHomog.at<float>(2,1)*sin(roll)) / (MatHomog.at<float>(1,0)-MatHomog.at<float>(1,1)*MatHomog.at<float>(2,0)/MatHomog.at<float>(2,1));
-      //yaw = cvg_utils_library::asin_ws(aux);
-      yaw = asin(aux);
-	}
-	else
-	{
-		yaw=atan2(-MatHomog.at<float>(0,1),MatHomog.at<float>(0,0));
-	}
-	
-
-	//end
-	YPRVec->at<float>(0,0)=yaw;
-	YPRVec->at<float>(1,0)=pitch;
-	YPRVec->at<float>(2,0)=roll;
-	
-	
-    return 1;
-
-}
-
-
-int homogeneusTransformation::calculateMatHomogFromYPRVecTraVec(cv::Mat* MatHomog, cv::Mat YPRVec, cv::Mat TraVec)
-{
-    *MatHomog=cv::Mat::zeros(4,4,CV_32F);
-	
-	
-	//Rotations
-	
-	float roll=YPRVec.at<float>(2,0);
-    cv::Mat MatHRoll=cv::Mat::zeros(4,4,CV_32F);
-	MatHRoll.at<float>(0,0)=1.0;
-	MatHRoll.at<float>(1,1)=cos(roll); MatHRoll.at<float>(1,2)=-sin(roll);
-	MatHRoll.at<float>(2,1)=sin(roll); MatHRoll.at<float>(2,2)=cos(roll);
-	MatHRoll.at<float>(3,3)=1.0;
-	float pitch=YPRVec.at<float>(1,0);
-    cv::Mat MatHPitch=cv::Mat::zeros(4,4,CV_32F);
-	MatHPitch.at<float>(0,0)=cos(pitch); MatHPitch.at<float>(0,2)=sin(pitch);
-	MatHPitch.at<float>(1,1)=1.0;
-	MatHPitch.at<float>(2,0)=-sin(pitch); MatHPitch.at<float>(2,2)=cos(pitch);
-	MatHPitch.at<float>(3,3)=1.0;
-	float yaw=YPRVec.at<float>(0,0);
-    cv::Mat MatHYaw=cv::Mat::zeros(4,4,CV_32F);
-	MatHYaw.at<float>(0,0)=cos(yaw); MatHYaw.at<float>(0,1)=-sin(yaw);
-	MatHYaw.at<float>(1,0)=sin(yaw); MatHYaw.at<float>(1,1)=cos(yaw);
-	MatHYaw.at<float>(2,2)=1.0;
-	MatHYaw.at<float>(3,3)=1.0;
-	*MatHomog=MatHRoll*MatHPitch*MatHYaw;
-	
-	/*
-	for(int i=0;i<3;i++)
-		for(int j=0;j<3;j++)
-			MatHomog->at<float>(i,j)=RotMat.at<float>(i,j);
-	*/
-	
-	
-	//Translation
-	for(int i=0;i<3;i++)
-	{
-        MatHomog->at<float>(i,3)=TraVec.at<float>(i,0);
-	}
-	
-	
-	//Scale
-	MatHomog->at<float>(3,3)=1.0;
-	
-	
-	return 1;
-}
-
-
-
-int calculateMatHomogFromRotMatTraVec(cv::Mat* MatHomog, cv::Mat RotMat, cv::Mat TraVec)
-{
-    *MatHomog=cv::Mat::zeros(4,4,CV_32F);
-
-    //Rotation
-    for(int i=0;i<3;i++)
-        for(int j=0;j<3;j++)
-            MatHomog->at<float>(i,j)=RotMat.at<float>(i,j);
-
-
-    //Translation
-    for(int i=0;i<3;i++)
-    {
-        MatHomog->at<float>(i,3)=TraVec.at<float>(i,0);
-    }
-
-
-    //Scale
-    MatHomog->at<float>(3,3)=1.0;
-
-    return 1;
-}
-
 

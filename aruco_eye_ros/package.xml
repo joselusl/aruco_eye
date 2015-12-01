@@ -1,4 +1,5 @@
-<package>
+<?xml version="1.0"?>
+<package format="2">
 	<name>aruco_eye_ros</name>
 	<version>1.0.0</version>
 	<description>
@@ -11,17 +12,13 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <build_depend>roscpp</build_depend>
-	<build_depend>image_transport</build_depend>
-	<build_depend>cv_bridge</build_depend>
-	<build_depend>aruco_eye_msgs</build_depend>
-	<build_depend>aruco_eye</build_depend>
+  <depend>roscpp</depend>
+	<depend>image_transport</depend>
+	<depend>cv_bridge</depend>
+  <depend>geometry_msgs</depend>
+  <depend>tf</depend>
+	<depend>aruco_eye_msgs</depend>
+	<depend>aruco_eye_core</depend>
 
-	<run_depend>roscpp</run_depend>
-	<run_depend>image_transport</run_depend>
-	<run_depend>cv_bridge</run_depend>
-	<run_depend>aruco_eye_msgs</run_depend>
-	<run_depend>aruco_eye</run_depend>
- 
 </package>
 

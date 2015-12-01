@@ -1,16 +1,19 @@
 <?xml version="1.0"?>
 <package format="2">
-	<name>aruco_lib</name>
+	<name>aruco_eye_core</name>
 	<version>1.0.0</version>
 	<description>
-    		This package is aruco_lib.
+    		This package is aruco_eye_core.
 	</description>
 	<author email="jl.sanchez@upm.es">Jose Luis Sanchez-Lopez</author>
 	<maintainer email="jl.sanchez@upm.es">Jose Luis Sanchez-Lopez</maintainer>
   	<license>BSD</license>
-	<url>http://ros.org/wiki/aruco_lib</url>
+	<url>http://ros.org/wiki/aruco_eye_core</url>
 
   	<buildtool_depend>catkin</buildtool_depend>
+
+        <depend>lib_pugixml</depend>
+        <depend>aruco_lib</depend>
 
   
 </package>

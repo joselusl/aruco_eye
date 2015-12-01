@@ -56,29 +56,10 @@
 //#define VERBOSE_ARUCO_EYE
 
 
+// Boost
+#include <boost/filesystem.hpp>
 
 
-
-
-/////////////////////////////////////////
-// Class homogeneusTransformation
-//
-//   Description
-//
-/////////////////////////////////////////
-class homogeneusTransformation
-{
-public:
-    //Mat homog <-> Tvec & RVec
-    static int createMatHomogFromVecs(cv::Mat& MatHomog, cv::Mat TransVec, cv::Mat RotVec);
-    static int calculateVecsFromMatHomog(cv::Mat& TransVec, cv::Mat& RotVec, cv::Mat MatHomog);
-
-    //Otros
-    static int calculateTraVecYPRFromMatHomog(cv::Mat *YPRVec, cv::Mat *TraVec, cv::Mat MatHomog);
-    static int calculateMatHomogFromYPRVecTraVec(cv::Mat* MatHomog, cv::Mat YPRVec, cv::Mat TraVec);
-    static int calculateMatHomogFromRotMatTraVec(cv::Mat* MatHomog, cv::Mat RotMat, cv::Mat TraVec);
-
-};
 
 
 
@@ -137,6 +118,12 @@ public:
 };
 
 
+/////////////////////////////////////////
+// Class ArucoMarker
+//
+//   Description
+//
+/////////////////////////////////////////
 class ArucoMarker
 {
 public:
@@ -179,8 +166,12 @@ protected:
 private:
     //Configs
     aruco::CameraParameters TheCameraParameters;
+    bool flagCameraParametersSet;
+public:
+    bool isTheCameraParametersSet();
 
 
+protected:
     //Markers List
     std::vector<ArucoMarker> TheMarkers;
 
@@ -209,6 +200,7 @@ public:
     //Setting the camera parameters
 public:
     int setCameraParameters(std::string filename);
+    int setCameraParameters(aruco::CameraParameters camParam);
 
     //Configure ArucoDetector
 public:
@@ -220,12 +212,11 @@ public:
 
 
 
-
-
-
     //Drawing
 public:
     int drawDetectedArucoCodes(bool drawDetectedCodes=true, bool draw3DReconstructedCodes=true);
+    char displayDetectedArucoCodes(std::string windowName, int waitingTime=1);
+public:
     char drawAndDisplayDetectedArucoCodes(std::string windowName, int waitingTime=1, bool drawDetectedCodes=true, bool draw3DReconstructedCodes=true);
 
 

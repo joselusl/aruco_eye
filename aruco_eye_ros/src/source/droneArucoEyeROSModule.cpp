@@ -24,6 +24,9 @@ ArucoEyeROS::ArucoEyeROS(int argc, char **argv)
     ros::init(argc, argv, ros::this_node::getName());
     ros::NodeHandle nh;
 
+    imageTransport=new image_transport::ImageTransport(nh);
+    tfTransformBroadcaster=new tf::TransformBroadcaster;
+
     init();
     return;
 }
@@ -31,6 +34,10 @@ ArucoEyeROS::ArucoEyeROS(int argc, char **argv)
 
 ArucoEyeROS::~ArucoEyeROS()
 {
+    // Delete
+    delete imageTransport;
+    delete tfTransformBroadcaster;
+    // CLose
     close();
     return;
 }
@@ -39,9 +46,10 @@ ArucoEyeROS::~ArucoEyeROS()
 
 int ArucoEyeROS::configureArucoEye(std::string arucoListFile, std::string cameraCalibrationFile)
 {
+    int error=0;
 
     //configure aruco detector
-    if(!MyArucoEye.configureArucoDetector(ARUCO_EYE_CONFIG_enableErosion,
+    if(MyArucoEye.configureArucoDetector(ARUCO_EYE_CONFIG_enableErosion,
                                           ARUCO_EYE_CONFIG_thresholdMethod,
                                           ARUCO_EYE_CONFIG_ThresParam1,
                                           ARUCO_EYE_CONFIG_ThresParam2,
@@ -50,32 +58,32 @@ int ArucoEyeROS::configureArucoEye(std::string arucoListFile, std::string camera
                                           ARUCO_EYE_CONFIG_minSize,
                                           ARUCO_EYE_CONFIG_maxSize) )
     {
-#ifdef VERBOSE_DRONE_ARUCO_EYE
-        cout<<"[DAE] Error configuring Aruco Retina"<<endl;
+#ifdef VERBOSE_ARUCO_EYE_ROS
+        cout<<"[AE-ROS] Error configuring Aruco Eye: configureArucoDetector"<<endl;
 #endif
-        return 0;
+        error=1;
     }
 
     //set aruco list
-    if(!MyArucoEye.setArucoList(arucoListFile))
+    if(MyArucoEye.setArucoList(arucoListFile))
     {
-#ifdef VERBOSE_DRONE_ARUCO_EYE
-        cout<<"[DAE] Error configuring Aruco Retina"<<endl;
+#ifdef VERBOSE_ARUCO_EYE_ROS
+        cout<<"[AE-ROS] Error configuring Aruco Eye: setArucoList"<<endl;
 #endif
-        return 0;
+        error=2;
     }
 
     //set camera parameters
-    if(!MyArucoEye.setCameraParameters(cameraCalibrationFile))
+    if(MyArucoEye.setCameraParameters(cameraCalibrationFile))
     {
-#ifdef VERBOSE_DRONE_ARUCO_EYE
-        cout<<"[DAE] Error configuring Aruco Retina"<<endl;
+#ifdef VERBOSE_ARUCO_EYE_ROS
+        cout<<"[AE-ROS] Error configuring Aruco Eye: setCameraParameters()"<<endl;
 #endif
-        return 0;
+        error=-1;
     }
 
     //End
-    return 1;
+    return error;
 }
 
 
@@ -104,68 +112,89 @@ void ArucoEyeROS::readParameters()
     //
     ros::param::param<std::string>("~camera_calibration_file", cameraCalibrationFile, "camera.yaml");
     std::cout<<"cameraCalibrationFile="<<cameraCalibrationFile<<std::endl;
-    // TODO
-    // parameters of the aruco detector -> Now hardcoded!
+
+    // TODO parameters of the aruco detector -> Now hardcoded!
+    //
+
+    // Other parameters
     //
     ros::param::param<std::string>("~aruco_detector_frame_name", aruco_detector_frame_name,"aruco_detector_frame");
     std::cout<<"aruco_detector_frame_name="<<aruco_detector_frame_name<<std::endl;
-
+    //
+    ros::param::param<std::string>("~aruco_marker_child_base_name", aruco_marker_child_base_name,"aruco_marker_");
+    std::cout<<"aruco_marker_child_base_name="<<aruco_marker_child_base_name<<std::endl;
 
     // Topic names
     //
     ros::param::param<std::string>("~image_topic_name", imageTopicName, "camera/image_raw");
     std::cout<<"image_topic_name="<<imageTopicName<<std::endl;
     //
-    ros::param::param<std::string>("~aruco_list_topic_name", arucoListTopicName, "arucoObservation");
+    ros::param::param<std::string>("~camera_info_topic_name", camera_info_topic_name, "camera/camera_info");
+    std::cout<<"camera_info_topic_name="<<camera_info_topic_name<<std::endl;
+    //
+    ros::param::param<std::string>("~aruco_list_topic_name", arucoListTopicName, "aruco_eye/aruco_observation");
     std::cout<<"aruco_list_topic_name="<<arucoListTopicName<<std::endl;
+    //
+    ros::param::param<std::string>("~output_image_topic_name", outputImageTopicName, "aruco_eye/aruco_observation_image/image_raw");
+    std::cout<<"output_image_topic_name="<<outputImageTopicName<<std::endl;
+
+
 
     return;
 }
 
-void ArucoEyeROS::open()
+int ArucoEyeROS::open()
 {
     ros::NodeHandle nh;
-
 
     // Read parameters
     readParameters();
 
 
-
     //configure droneArucoEye
-    if(!configureArucoEye(arucoListFile,cameraCalibrationFile))
+    int errorConfigureArucoEye=configureArucoEye(arucoListFile, cameraCalibrationFile);
+    if(errorConfigureArucoEye > 0)
     {
-#ifdef VERBOSE_DRONE_ARUCO_EYE_ROS_MODULE
-        cout<<"[DAE-ROS] Error configuring Aruco Eye"<<endl;
+#ifdef VERBOSE_ARUCO_EYE_ROS
+        cout<<"[AE-ROS] Critical Error configuring Aruco Eye"<<endl;
 #endif
-        return;
+        return 1;
+    }
+    else if(errorConfigureArucoEye > 0)
+    {
+#ifdef VERBOSE_ARUCO_EYE_ROS
+        cout<<"[AE-ROS] Partial Configuration of Aruco Eye"<<endl;
+#endif
     }
 
+    // Subscriber Image
+    imageSubs = imageTransport->subscribe(imageTopicName, 1, &ArucoEyeROS::imageCallback, this);
+    // Subscriber Camerainfo
+    if(!MyArucoEye.isTheCameraParametersSet())
+        cameraInfoSub=nh.subscribe(camera_info_topic_name, 1, &ArucoEyeROS::cameraInfoCallback, this);
 
-
-    // Subscriber
-    imageSubs = nh.subscribe(imageTopicName, 1, &ArucoEyeROS::imageCallback, this);
-
-    //Publisher aruco 3D pose
+    // Publisher aruco 3D pose
     arucoListPubl = nh.advertise<aruco_eye_msgs::MarkerList>(arucoListTopicName, 1, true);
-
+    // Publisher output image
+    outputImagePub = imageTransport->advertise(outputImageTopicName, 1);
 
 
 #ifdef DISPLAY_ARUCO_EYE
     //Name
     arucoEyeWindow="arucoEye";
     //Create gui
-    cv::namedWindow(arucoEyeWindow,1);
+    cv::namedWindow(arucoEyeWindow, 1);
 #endif
 
-
     //End
-    return;
+    return 0;
 }
 
 
 void ArucoEyeROS::imageCallback(const sensor_msgs::ImageConstPtr& msg)
 {
+    // Current Time Stamp
+    ros::Time curr_stamp(msg->header.stamp);
 
     //Transform image message to Opencv to be processed
     try
@@ -174,7 +203,7 @@ void ArucoEyeROS::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     }
     catch (cv_bridge::Exception& e)
     {
-#ifdef VERBOSE_DRONE_ARUCO_EYE_ROS_MODULE
+#ifdef VERBOSE_ARUCO_EYE_ROS
         ROS_ERROR("cv_bridge exception: %s", e.what());
 #endif
         return;
@@ -183,114 +212,136 @@ void ArucoEyeROS::imageCallback(const sensor_msgs::ImageConstPtr& msg)
 
 
     //Set image to aruco eye
-    if(!MyArucoEye.setInputImage(imageMat))
+    if(MyArucoEye.setInputImage(imageMat))
         return;
 
 
-    // Prepare message to be published
-    arucoListMsg.markers.clear();
-    // Header
-    arucoListMsg.header.stamp=msg->header.stamp;
-    arucoListMsg.header.frame_id=this->aruco_detector_frame_name;
+    if(arucoListPubl.getNumSubscribers()>0)
+    {
+        // Prepare message to be published
+        arucoListMsg.markers.clear();
+        // Header
+        arucoListMsg.header.stamp=curr_stamp;
+        arucoListMsg.header.frame_id=this->aruco_detector_frame_name;
+    }
 
 
     //Run aruco eye
     unsigned int numCodesDetected, numCodesReconstructed;
-    if(!MyArucoEye.run(numCodesDetected, numCodesReconstructed))
+    if(MyArucoEye.run(numCodesDetected, numCodesReconstructed))
         return;
-#ifdef VERBOSE_DRONE_ARUCO_EYE_ROS_MODULE
-    cout<<"[DAE-ROS] numCodesDetected="<<numCodesDetected<<"; ";
+#ifdef VERBOSE_ARUCO_EYE_ROS
+    cout<<"[AE-ROS] numCodesDetected="<<numCodesDetected<<"; ";
     cout<<"numCodesReconstructed="<<numCodesReconstructed<<endl;
 #endif
 
 
-    // Iterate over the markers to fill the message
+    // Get the markers
     std::vector<ArucoMarker> TheMarkers;
     MyArucoEye.getMarkersList(TheMarkers);
+
+    // Iterate over the markers to fill the messages
     for(unsigned int i=0; i<TheMarkers.size(); i++)
     {
         aruco_eye_msgs::Marker TheMarkerMsg;
-        TheMarkerMsg.header.stamp=arucoListMsg.header.stamp;
-        TheMarkerMsg.header.frame_id=arucoListMsg.header.frame_id;
 
         // Detected
         aruco::Marker TheArucoMarker=TheMarkers[i].getMarker();
-        TheMarkerMsg.id=TheArucoMarker.id;
+
+        std::string child_name = aruco_marker_child_base_name+std::to_string(TheArucoMarker.id);
+        std::string parent_name = aruco_detector_frame_name;
+
+        if(arucoListPubl.getNumSubscribers()>0)
+        {
+            TheMarkerMsg.header.stamp=curr_stamp;
+            TheMarkerMsg.header.frame_id=child_name;
+            TheMarkerMsg.id=TheArucoMarker.id;
+        }
 
         // Reconstructed
         if(TheMarkers[i].is3DReconstructed())
         {
+            // TF
+            tf::Transform transform = arucoMarker2Tf(TheArucoMarker);
+            tfTransformBroadcaster->sendTransform(tf::StampedTransform(transform, curr_stamp,
+                                                  parent_name, child_name));
+
             // Fill the message
-            // TODO
+            if(arucoListPubl.getNumSubscribers()>0)
+            {
+                geometry_msgs::Pose poseMsg;
+                tf::poseTFToMsg(transform, poseMsg);
+                TheMarkerMsg.pose.pose=poseMsg;
+                // TODO Covariance
+            }
+
         }
 
 
+        if(arucoListPubl.getNumSubscribers()>0)
+        {
+            // Push
+            arucoListMsg.markers.push_back(TheMarkerMsg);
+        }
+    }
 
-        // Push
-        arucoListMsg.markers.push_back(TheMarkerMsg);
+    if(arucoListPubl.getNumSubscribers()>0)
+    {
+        // Publish Aruco List
+        if(publishArucoList())
+            return;
+    }
+
+    // Draw aruco codes
+    drawArucoCodes(true,true);
+
+    // Publish Output Image
+    if(outputImagePub.getNumSubscribers()>0)
+    {
+        if(!MyArucoEye.getOutputImage(outputImageMat))
+        {
+            cv_bridge::CvImage out_msg;
+            out_msg.header.stamp = curr_stamp;
+            out_msg.encoding = sensor_msgs::image_encodings::BGR8;
+            out_msg.image = outputImageMat;
+            outputImagePub.publish(out_msg.toImageMsg());
+        }
     }
 
 
-    //Publish
-    if(!publishArucoList())
-        return;
-
-
 #ifdef DISPLAY_ARUCO_EYE
-    //Draw
-    drawArucoCodes(arucoEyeWindow,1,true,true);
+    // Display
+    displayArucoCodes(arucoEyeWindow,1);
 #endif
-
 
 
     return;
 }
 
 
-/*
-//Run
-bool ArucoEyeROS::run()
+void ArucoEyeROS::cameraInfoCallback(const sensor_msgs::CameraInfo &msg)
 {
+    if(!MyArucoEye.setCameraParameters(rosCameraInfo2ArucoCamParams(msg, true)))
+        cameraInfoSub.shutdown();
 
-    //Get codes reconstructed
-    int idMarker;
-    cv::Mat matHomog_aruco_GMR_wrt_drone_GMR;
-    for(unsigned int i=0; i<numCodesReconstructed;i++)
-    {
-        if(!MyDroneArucoEye.getDroneMarkerI(i,idMarker,matHomog_aruco_GMR_wrt_drone_GMR))
-        {
-            continue;
-        }
-
-        double x = 0.0, y = 0.0, z = 0.0, yaw = 0.0, pitch = 0.0, roll = 0.0;
-        referenceFrames::getxyzYPRfromHomogMatrix_wYvPuR( matHomog_aruco_GMR_wrt_drone_GMR, &x, &y, &z, &yaw, &pitch, &roll);
-
-#ifdef VERBOSE_DRONE_ARUCO_EYE_ROS_MODULE
-        cout<<"[DAE-ROS] Marker id="<<idMarker<<"; HomogTransInWorld="<<matHomog_aruco_GMR_wrt_drone_GMR<<endl;
-
-        std::cout<<"[DAE-ROS]  Homog_aruco_GMR_wrt_drone_GMR_wYvPuR =\n"<<
-                   "    x = "   << x   << " y = "     << y     << " z = "   << z    << endl <<
-                   "    yaw = " << yaw*(180.0/M_PI) << " pitch = " << pitch*(180.0/M_PI) << " roll = "<< roll*(180.0/M_PI) << endl;
-#endif
-
-        //message
-        arucoListMsg.obs.push_back( aruco_msgs::Observation3D() );
-        arucoListMsg.obs[i].id = idMarker;
-        arucoListMsg.obs[i].x = x;
-        arucoListMsg.obs[i].y = y;
-        arucoListMsg.obs[i].z = z;
-        arucoListMsg.obs[i].yaw   = yaw;
-        arucoListMsg.obs[i].pitch = pitch;
-        arucoListMsg.obs[i].roll  = roll;
-    }
-
-
-
-    //end
-    return true;
+    return;
 }
 
-*/
+int ArucoEyeROS::run()
+{
+    try
+    {
+        ros::spin();
+    }
+    catch (std::exception &ex)
+    {
+        std::cout<<"[ROSNODE] Exception :"<<ex.what()<<std::endl;
+    }
+
+    return 0;
+}
+
+
 
 bool ArucoEyeROS::publishArucoList()
 {
@@ -302,9 +353,84 @@ bool ArucoEyeROS::publishArucoList()
     return 1;
 }
 
-
-
-int ArucoEyeROS::drawArucoCodes(std::string windowName, int waitingTime, bool drawDetectedCodes, bool draw3DReconstructedCodes)
+int ArucoEyeROS::drawArucoCodes(bool drawDetectedCodes, bool draw3DReconstructedCodes)
 {
-    return MyArucoEye.drawAndDisplayDetectedArucoCodes(windowName, waitingTime, drawDetectedCodes, draw3DReconstructedCodes);
+    return MyArucoEye.drawDetectedArucoCodes(drawDetectedCodes, draw3DReconstructedCodes);
+}
+
+#ifdef DISPLAY_ARUCO_EYE
+char ArucoEyeROS::displayArucoCodes(std::string windowName, int waitingTime)
+{
+    return MyArucoEye.displayDetectedArucoCodes(windowName, waitingTime);
+}
+#endif
+
+
+tf::Transform ArucoEyeROS::arucoMarker2Tf(const aruco::Marker &marker)
+{
+    cv::Mat rot(3, 3, CV_32FC1);
+    cv::Rodrigues(marker.Rvec, rot);
+    cv::Mat tran = marker.Tvec;
+
+//    cv::Mat rotate_to_ros(3, 3, CV_32FC1);
+//    // -1 0 0
+//    // 0 0 1
+//    // 0 1 0
+//    rotate_to_ros.at<float>(0,0) = -1.0;
+//    rotate_to_ros.at<float>(0,1) = 0.0;
+//    rotate_to_ros.at<float>(0,2) = 0.0;
+//    rotate_to_ros.at<float>(1,0) = 0.0;
+//    rotate_to_ros.at<float>(1,1) = 0.0;
+//    rotate_to_ros.at<float>(1,2) = 1.0;
+//    rotate_to_ros.at<float>(2,0) = 0.0;
+//    rotate_to_ros.at<float>(2,1) = 1.0;
+//    rotate_to_ros.at<float>(2,2) = 0.0;
+//    rot = rot*rotate_to_ros.t();
+
+    tf::Matrix3x3 tf_rot(rot.at<float>(0,0), rot.at<float>(0,1), rot.at<float>(0,2),
+                       rot.at<float>(1,0), rot.at<float>(1,1), rot.at<float>(1,2),
+                       rot.at<float>(2,0), rot.at<float>(2,1), rot.at<float>(2,2));
+
+    tf::Vector3 tf_orig(tran.at<float>(0,0), tran.at<float>(1,0), tran.at<float>(2,0));
+
+    return tf::Transform(tf_rot, tf_orig);
+}
+
+
+aruco::CameraParameters ArucoEyeROS::rosCameraInfo2ArucoCamParams(const sensor_msgs::CameraInfo& cam_info,
+                                                                bool useRectifiedParameters)
+{
+    cv::Mat cameraMatrix(3, 3, CV_32FC1);
+    cv::Mat distorsionCoeff(4, 1, CV_32FC1);
+    cv::Size size(cam_info.height, cam_info.width);
+
+    if ( useRectifiedParameters )
+    {
+      cameraMatrix.setTo(0);
+      cameraMatrix.at<float>(0,0) = cam_info.P[0];   cameraMatrix.at<float>(0,1) = cam_info.P[1];   cameraMatrix.at<float>(0,2) = cam_info.P[2];
+      cameraMatrix.at<float>(1,0) = cam_info.P[4];   cameraMatrix.at<float>(1,1) = cam_info.P[5];   cameraMatrix.at<float>(1,2) = cam_info.P[6];
+      cameraMatrix.at<float>(2,0) = cam_info.P[8];   cameraMatrix.at<float>(2,1) = cam_info.P[9];   cameraMatrix.at<float>(2,2) = cam_info.P[10];
+
+      for(int i=0; i<4; ++i)
+        distorsionCoeff.at<float>(i, 0) = 0;
+    }
+    else
+    {
+      for(int i=0; i<9; ++i)
+        cameraMatrix.at<float>(i%3, i-(i%3)*3) = cam_info.K[i];
+
+      if(cam_info.D.size() == 4)
+      {
+        for(int i=0; i<4; ++i)
+          distorsionCoeff.at<float>(i, 0) = cam_info.D[i];
+      }
+      else
+      {
+        ROS_WARN("length of camera_info D vector is not 4, assuming zero distortion...");
+        for(int i=0; i<4; ++i)
+          distorsionCoeff.at<float>(i, 0) = 0;
+      }
+    }
+
+    return aruco::CameraParameters(cameraMatrix, distorsionCoeff, size);
 }

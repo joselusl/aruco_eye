@@ -35,14 +35,14 @@ set(ARUCO_ROS_HEADER_FILES
 
 
 find_package(catkin REQUIRED
-                COMPONENTS roscpp image_transport cv_bridge aruco_eye_msgs aruco_eye)
+                COMPONENTS roscpp image_transport cv_bridge geometry_msgs tf aruco_eye_msgs aruco_eye_core)
 
 find_package(OpenCV REQUIRED)
 
 
 catkin_package(
-        DEPENDS OpenCV
-        CATKIN_DEPENDS roscpp image_transport cv_bridge aruco_eye_msgs aruco_eye
+    DEPENDS OpenCV
+    CATKIN_DEPENDS roscpp image_transport cv_bridge geometry_msgs tf aruco_eye_msgs aruco_eye_core
   )
 
 

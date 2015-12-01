@@ -34,9 +34,9 @@
 #include <opencv2/opencv.hpp>
 
 
-//Aruco
+//aruco
 #include "aruco.h"
-//Aruco JL Lib
+//aruco_eye Lib
 #include "arucoEye.h"
 
 
@@ -57,18 +57,23 @@
 
 
 // Camera calibration
-//TODO
+#include <sensor_msgs/CameraInfo.h>
+
+
+// Tf
+#include <tf/transform_datatypes.h>
+#include <tf/transform_broadcaster.h>
 
 
 
+//#define VERBOSE_ARUCO_EYE_ROS
 
-#define VERBOSE_DRONE_ARUCO_EYE_ROS_MODULE
-
-#define DISPLAY_ARUCO_EYE
-
+//#define DISPLAY_ARUCO_EYE
 
 
-//configurations
+
+// configurations
+// TODO
 const bool ARUCO_EYE_CONFIG_enableErosion=false;
 const aruco::MarkerDetector::ThresholdMethods ARUCO_EYE_CONFIG_thresholdMethod=aruco::MarkerDetector::ADPT_THRES;
 const double ARUCO_EYE_CONFIG_ThresParam1=7;
@@ -107,14 +112,28 @@ protected:
 protected:
     std::string aruco_detector_frame_name;
 
+    std::string aruco_marker_child_base_name;
+
 
 
     // Camera Calibration
 protected:
     // Calibration using file
     std::string cameraCalibrationFile;
-    // TODO: Calibration using topic
 
+    // Calibration using topic
+protected:
+    std::string camera_info_topic_name;
+    ros::Subscriber cameraInfoSub;
+    void cameraInfoCallback(const sensor_msgs::CameraInfo &msg);
+protected:
+    aruco::CameraParameters rosCameraInfo2ArucoCamParams(const sensor_msgs::CameraInfo& cam_info,
+                                                                    bool useRectifiedParameters);
+
+
+    // Images
+protected:
+    image_transport::ImageTransport* imageTransport;
 
     //Images received
 protected:
@@ -122,12 +141,16 @@ protected:
     cv_bridge::CvImagePtr cvImage;
     cv::Mat imageMat;
     //Subscriber
-    ros::Subscriber imageSubs;
+    image_transport::Subscriber imageSubs;
     void imageCallback(const sensor_msgs::ImageConstPtr& msg);
 
 
     // Output image
-    // TODO
+protected:
+    std::string outputImageTopicName;
+    cv::Mat outputImageMat;
+    // Publisher
+    image_transport::Publisher outputImagePub;
 
 
     //Aruco Visual Markers detected
@@ -150,7 +173,9 @@ public:
 
     //Open
  public:
-    void open();
+    int open();
+
+    int run();
 
 protected:
     void readParameters();
@@ -158,13 +183,22 @@ protected:
 
 
     //Drawing
+public:
+    int drawArucoCodes(bool drawDetectedCodes=true, bool draw3DReconstructedCodes=true);
 #ifdef DISPLAY_ARUCO_EYE
 protected:
     //Name
     std::string arucoEyeWindow;
 public:
-    int drawArucoCodes(std::string windowName, int waitingTime=1, bool drawDetectedCodes=true, bool draw3DReconstructedCodes=true);
+    char displayArucoCodes(std::string windowName, int waitingTime=1);
 #endif
+
+
+    // Tf
+protected:
+    tf::TransformBroadcaster* tfTransformBroadcaster;
+protected:
+    tf::Transform arucoMarker2Tf(const aruco::Marker &marker);
 
 };
 

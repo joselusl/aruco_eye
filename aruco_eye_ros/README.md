@@ -1,4 +1,5 @@
-# droneArucoEyeROSModule
+# aruco_eye_ros
+FIXME
 This repository is the ROSModule interface and executable of the droneArucoEye package.
 
 

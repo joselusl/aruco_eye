@@ -1,4 +1,5 @@
 # lib_aruco
+FIXME
 This repository is the ROS library for aruco: [http://sourceforge.net/projects/aruco/](http://sourceforge.net/projects/aruco/).
 
 
@@ -60,13 +61,13 @@ This repository has the following branches:
 ## System Requirements and Compatibility
 This package is running under:
 
-+ Ubuntu: 12.04 and above
-+ ROS: Hydro and above with Catkin
++ Ubuntu: 14.04 and above
++ ROS: Jade and above with Catkin
 
 This package has been tested under:
 
-+ Ubuntu: 12.04, 14.04
-+ ROS: Hydro, Indigo with Catkin
++ Ubuntu: 14.04
++ ROS: Indigo with Catkin
 
 
 ## Dependencies
@@ -85,19 +86,19 @@ This package does not depend on any additional ROS packages.
 
 
 # Installation Instructions
-Please, see installation instructions of the full stack.
+Nothing special.
 
 
 ## Pre-requirements
-Please, see installation instructions of the full stack.
+Nothing special.
 
 
 ## Installation steps
-Please, see installation instructions of the full stack.
+Nothing special.
 	
 	
 # Running Instructions
-Please, see running instructions of the full stack.
+Nothing special..
 
 
 
@@ -110,40 +111,6 @@ If this repository gets the interest of the community, we will continue adding i
 
 # License
 All distributed software are subject to the 3-clause BSD license. 
-
-
-
-# Related publications and Citing
-We have the following publications related with this package:
-
-Papers that explain the full stack where this package is included:
-
-+ J. L. Sanchez-Lopez, J. Pestana, P. de la Puente, R. Suarez-Fernandez, P. Campoy. A System for the Design and Development of Vision-based Multi-robot Quadrotor Swarms. 2014 International Conference on Unmanned Aircraft Systems (ICUAS’14). Orlando (FL, USA). May 27-30, 2014. Pp: 640-648. DOI: 10.1109/ICUAS.2014.6842308.
-
-
-Papers that explain the competitions where the Computer Vision Group has participated using the full stack:
-
-1. IMAV 2013
-
-	+ J. L. Sanchez-Lopez, J. Pestana, P. de la Puente, A. Carrio, P. Campoy. Visual Quadrotor Swarm for the IMAV 2013 Indoor Competition. Robot 2013: First Iberian Robotics Conference (ROBOT 2013). Madrid (Spain). Nov. 28-29, 2013. Book title: Robot 2013: First Iberian Robotics Conference. Book subtitle: Advances in intelligent Systems and Computing. Vol. 253. Published year: 2014. Pp: 55-63. DOI: 10.1007/978-3-319-03653-3_5. Print ISBN: 978-3-319-03652-6. Online ISBN: 978-3-319-03653-3. Publisher: Springer International Publishing.
-	+ J. L. Sanchez-Lopez, J. Pestana, P. de la Puente, P. Campoy. Visual Quadrotor Swarm for IMAV 2013 Indoor Competition. 2013 International Micro Aerial Vehicle Conference and Flight Competition (IMAV 2013). Toulouse (France). September, 17-20, 2013.
-
-
-1. IARC 2014
-
-	+ J. Pestana, J. L. Sanchez-Lopez, R. Suarez-Fernandez, JF Collumeau, P Campoy, J Martin-Cristobal, M Molina, J De Lope, D Maravall. A Vision Based Aerial Robot solution for the IARC 2014 by the Technical University of Madrid. 2014 International Aerial Robotics Competition (IARC 2014). Yantai (China). Aug. 3-7, 2014. 
-
-
-Please, don't forget to cite our best paper:
-
-	@INPROCEEDINGS{6842308,
-	  author={Sanchez-Lopez, J.L. and Pestana, J. and de la Puente, P. and Suarez-Fernandez, R. and Campoy, P.},
-	  booktitle={Unmanned Aircraft Systems (ICUAS), 2014 International Conference on},
-	  title={A system for the design and development of vision-based multi-robot quadrotor swarms},
-	  year={2014},
-	  month={May},
-	  pages={640-648}
-	}
 
 
 
