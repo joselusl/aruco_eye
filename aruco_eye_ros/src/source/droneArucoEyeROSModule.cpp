@@ -350,7 +350,7 @@ bool ArucoEyeROS::publishArucoList()
     arucoListPubl.publish(arucoListMsg);
 
     //end
-    return 1;
+    return 0;
 }
 
 int ArucoEyeROS::drawArucoCodes(bool drawDetectedCodes, bool draw3DReconstructedCodes)
