@@ -1,17 +1,17 @@
 //////////////////////////////////////////////////////
-//  droneArucoEyeROSModule.h
+//  aruco_eye_ros_detector.h
 //
-//  Created on: Jul 3, 2013
+//  Created on:
 //      Author: joselusl
 //
-//  Last modification on: Jan 15, 2014
+//  Last modification on:
 //      Author: joselusl
 //
 //////////////////////////////////////////////////////
 
 
-#ifndef _ARUCO_EYE_ROS_DISPLAY_H
-#define _ARUCO_EYE_ROS_DISPLAY_H
+#ifndef _ARUCO_EYE_ROS_DETECTOR_H
+#define _ARUCO_EYE_ROS_DETECTOR_H
 
 
 
@@ -35,9 +35,9 @@
 
 
 //aruco
-#include "aruco.h"
+#include "aruco_lib/aruco.h"
 //aruco_eye Lib
-#include "arucoEye.h"
+#include "aruco_eye_core/arucoEye.h"
 
 
 //ROS
@@ -49,9 +49,6 @@
 #include "aruco_eye_msgs/Marker.h"
 #include "aruco_eye_msgs/MarkerList.h"
 
-// Mesage filters
-#include <message_filters/subscriber.h>
-#include <message_filters/time_synchronizer.h>
 
 //ROS Images
 #include <image_transport/image_transport.h>
@@ -64,18 +61,26 @@
 #include <sensor_msgs/CameraInfo.h>
 
 
-//// Tf
+// Tf
 #include <tf/transform_datatypes.h>
+#include <tf/transform_broadcaster.h>
 
-
-
-// Services
-#include "aruco_eye_srvs/SetBool.h"
 
 
 //#define VERBOSE_ARUCO_EYE_ROS
 
 
+
+// configurations
+// TODO
+const bool ARUCO_EYE_CONFIG_enableErosion=false;
+const aruco::MarkerDetector::ThresholdMethods ARUCO_EYE_CONFIG_thresholdMethod=aruco::MarkerDetector::ADPT_THRES;
+const double ARUCO_EYE_CONFIG_ThresParam1=7;
+const double ARUCO_EYE_CONFIG_ThresParam2=7;
+const aruco::MarkerDetector::CornerRefinementMethod ARUCO_EYE_CONFIG_methodCornerRefinement=aruco::MarkerDetector::LINES;
+const int ARUCO_EYE_CONFIG_ThePyrDownLevel=0;
+const float ARUCO_EYE_CONFIG_minSize=0.045;//0.03;
+const float ARUCO_EYE_CONFIG_maxSize=0.5;//0.5;
 
 
 
@@ -86,15 +91,28 @@
 //   Description
 //
 /////////////////////////////////////////
-class ArucoEyeDisplayROS
+class ArucoEyeROS
 {
-    // Configure
+    // Aruco List File
+protected:
+    std::string arucoListFile;
+
+
 private:
-    int configureArucoEye(std::string cameraCalibrationFile);
+    int configureArucoEye(std::string arucoListFile, std::string cameraCalibrationFile);
+
 
     //ArucoRetina
 protected:
     ArucoEye MyArucoEye;
+
+
+    // Aruco Detector frame name
+protected:
+    std::string aruco_detector_frame_name;
+
+    std::string aruco_marker_child_base_name;
+
 
 
     // Camera Calibration
@@ -111,6 +129,7 @@ protected:
     aruco::CameraParameters rosCameraInfo2ArucoCamParams(const sensor_msgs::CameraInfo& cam_info,
                                                                     bool useRectifiedParameters);
 
+
     // Images
 protected:
     image_transport::ImageTransport* imageTransport;
@@ -121,35 +140,22 @@ protected:
     cv_bridge::CvImagePtr cvImage;
     cv::Mat imageMat;
     //Subscriber
-    message_filters::Subscriber<sensor_msgs::Image>* imageSubs;
+    image_transport::Subscriber imageSubs;
+    void imageCallback(const sensor_msgs::ImageConstPtr& msg);
+
 
     //Aruco Visual Markers detected
 protected:
     std::string arucoListTopicName;
-    message_filters::Subscriber<aruco_eye_msgs::MarkerList>* arucoListSub;
-    // Subscriber
+    ros::Publisher arucoListPubl; ////Publishers
     aruco_eye_msgs::MarkerList arucoListMsg; //Messages
-
-    // Synchronization between topics
-protected:
-    typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, aruco_eye_msgs::MarkerList> TheSyncPolicy;
-    message_filters::Synchronizer<TheSyncPolicy>* messagesSyncronizer;
-    void imageAndArucoListCallback(const sensor_msgs::ImageConstPtr& image, const aruco_eye_msgs::MarkerListConstPtr& arucoList);
-
-
-    // Output image
-protected:
-    std::string outputImageTopicName;
-    cv::Mat outputImageMat;
-    // Publisher
-    image_transport::Publisher outputImagePub;
-
+    bool publishArucoList();
 
 
     //Constructors and destructors
 public:
-    ArucoEyeDisplayROS(int argc,char **argv);
-    ~ArucoEyeDisplayROS();
+    ArucoEyeROS(int argc,char **argv);
+    ~ArucoEyeROS();
 
     //Init and close
 public:
@@ -167,25 +173,11 @@ protected:
 
 
 
-    // Drawing Aruco visual markers
-public:
-    int drawArucoCodes(bool drawDetectedCodes=true, bool draw3DReconstructedCodes=true);
+    // Tf
 protected:
-    // Flag
-    bool flagDisplayOutputImage;
-    // Name
-    std::string arucoEyeWindow;
-public:
-    char displayArucoCodes(std::string windowName, int waitingTime=1);
-
-
-    // Display image ROS service
+    tf::TransformBroadcaster* tfTransformBroadcaster;
 protected:
-    std::string enableDisplayImageSrvName;
-    ros::ServiceServer enableDisplayImageSrv;
-    bool enableDisplayImageCallback(aruco_eye_srvs::SetBool::Request  &req, aruco_eye_srvs::SetBool::Response &res);
-
-
+    tf::Transform arucoMarker2Tf(const aruco::Marker &marker);
 
 };
 

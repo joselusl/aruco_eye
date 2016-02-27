@@ -1,16 +1,16 @@
 //////////////////////////////////////////////////////
-//  droneArucoEyeROSModule.cpp
+//  aruco_eye_ros_display.cpp
 //
-//  Created on: Jul 3, 2013
+//  Created on:
 //      Author: joselusl
 //
-//  Last modification on: Jan 15, 2014
+//  Last modification on:
 //      Author: joselusl
 //
 //////////////////////////////////////////////////////
 
 
-#include "aruco_eye_ros_display.h"
+#include "aruco_eye_ros/aruco_eye_ros_display.h"
 
 
 

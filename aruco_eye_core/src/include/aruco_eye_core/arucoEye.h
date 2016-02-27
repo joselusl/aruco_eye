@@ -1,10 +1,10 @@
 //////////////////////////////////////////////////////
 //  arucoEye.h
 //
-//  Created on: Jul 3, 2013
+//  Created on:
 //      Author: joselusl
 //
-//  Last modification on: Oct 28, 2013
+//  Last modification on:
 //      Author: joselusl
 //
 //////////////////////////////////////////////////////
@@ -45,7 +45,7 @@
 #include <opencv2/opencv.hpp>
 
 //Aruco
-#include "aruco.h"
+#include "aruco_lib/aruco.h"
 
 //PUGIXML
 #include "pugixml.hpp"

@@ -28,8 +28,8 @@ set(ARUCO_ROS_SOURCE_FILES
 )
  
 set(ARUCO_ROS_HEADER_FILES
-	${ARUCO_ROS_INCLUDE_DIR}/aruco_eye_ros_detector.h
-	${ARUCO_ROS_INCLUDE_DIR}/aruco_eye_ros_display.h
+        ${ARUCO_ROS_INCLUDE_DIR}/aruco_eye_ros/aruco_eye_ros_detector.h
+        ${ARUCO_ROS_INCLUDE_DIR}/aruco_eye_ros/aruco_eye_ros_display.h
 )
 
 

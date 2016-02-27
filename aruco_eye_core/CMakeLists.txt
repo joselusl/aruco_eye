@@ -29,7 +29,7 @@ set(ARUCO_EYE_CORE_SOURCE_FILES
 )
  
 set(ARUCO_EYE_CORE_HEADER_FILES
-        ${ARUCO_EYE_CORE_INCLUDE_DIR}/arucoEye.h
+        ${ARUCO_EYE_CORE_INCLUDE_DIR}/aruco_eye_core/arucoEye.h
 )
 
 
