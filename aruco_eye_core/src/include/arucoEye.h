@@ -50,7 +50,6 @@
 //PUGIXML
 #include "pugixml.hpp"
 
-//#include "cvg_utils_library.h"
 
 
 //#define VERBOSE_ARUCO_EYE
@@ -73,7 +72,7 @@ class ArucoCodeDefinition
 {
 protected:
     int id; //aruco id
-    double size; //lado del aruco en metros
+    float size; //lado del aruco en metros
     bool flagSizeSet;
 		
 public:
@@ -81,10 +80,10 @@ public:
     ~ArucoCodeDefinition();
 
 public:
-    int setArucoCode(int idIn, double sizeIn);
+    int setArucoCode(int idIn, float sizeIn);
     int getId() const;
     bool isSizeSet() const;
-    double getSize() const;
+    float getSize() const;
   
 };
 
@@ -111,9 +110,9 @@ public:
     bool isCodeByIdInList(int idCode) const;
     bool isCodeWithSizeInList(int idCode) const;
 
-    int getCodeSizeById(double &sizeCode, int idCode);
+    int getCodeSizeById(float &sizeCode, int idCode) const;
 
-    int getCodeSize(double &sizeCode, unsigned int codePosition);
+    int getCodeSize(float &sizeCode, unsigned int codePosition) const;
 
 };
 
@@ -168,7 +167,7 @@ private:
     aruco::CameraParameters TheCameraParameters;
     bool flagCameraParametersSet;
 public:
-    bool isTheCameraParametersSet();
+    bool isTheCameraParametersSet() const;
 
 
 protected:
@@ -222,11 +221,16 @@ public:
 
 public:
     int setInputImage(cv::Mat InputImageIn);
-    int getOutputImage(cv::Mat &OutputImageOut);
+    int getOutputImage(cv::Mat &OutputImageOut) const;
 
 
 public:
-    int getMarkersList(std::vector<ArucoMarker> &TheMarkers3D);
+    int getMarkersList(std::vector<ArucoMarker> &TheMarkers) const;
+    int setMarkersList(const std::vector<ArucoMarker> TheMarkers);
+
+public:
+    int addMarkerToMarkersList(ArucoMarker TheMarkers);
+    int clearMarkersList();
 
 };
 

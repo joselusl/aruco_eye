@@ -13,7 +13,6 @@
   <arg name="aruco_marker_child_base_name" default="aruco_marker_"/>
 
   <arg name="image_topic_name" 	default="camera/image_raw" />
-  <arg name="output_image_topic_name" 	default="aruco_eye/aruco_observation_image/image_raw" />
   <arg name="aruco_list_topic_name" 	default="aruco_eye/aruco_observation" />
 
 
@@ -28,7 +27,6 @@
     <param name="aruco_marker_child_base_name" value="$(arg aruco_marker_child_base_name)" type="string"/>
 
     <param name="image_topic_name" value="$(arg image_topic_name)" type="string"/>
-    <param name="output_image_topic_name" value="$(arg output_image_topic_name)" type="string"/>
     <param name="aruco_list_topic_name" value="$(arg aruco_list_topic_name)" type="string"/>
 
 	</node>

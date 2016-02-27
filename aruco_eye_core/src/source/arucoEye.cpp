@@ -37,7 +37,7 @@ ArucoCodeDefinition::~ArucoCodeDefinition()
 }
 
 
-int ArucoCodeDefinition::setArucoCode(int idIn, double sizeIn)
+int ArucoCodeDefinition::setArucoCode(int idIn, float sizeIn)
 {
     id=idIn;
     if(sizeIn<=0)
@@ -63,7 +63,7 @@ bool ArucoCodeDefinition::isSizeSet() const
     return flagSizeSet;
 }
 
-double ArucoCodeDefinition::getSize() const
+float ArucoCodeDefinition::getSize() const
 {
     return size;
 }
@@ -175,7 +175,7 @@ bool ArucoListDefinition::isCodeWithSizeInList(int idCode) const
 }
 
 
-int ArucoListDefinition::getCodeSizeById(double &sizeCode, int idCode)
+int ArucoListDefinition::getCodeSizeById(float &sizeCode, int idCode) const
 {
     sizeCode=-1.0;
 
@@ -198,7 +198,7 @@ int ArucoListDefinition::getCodeSizeById(double &sizeCode, int idCode)
     return 2;
 }
 
-int ArucoListDefinition::getCodeSize(double &sizeCode, unsigned int codePosition)
+int ArucoListDefinition::getCodeSize(float &sizeCode, unsigned int codePosition) const
 {
     if(codePosition<ArucoListDefinitionCodes.size())
     {
@@ -304,7 +304,7 @@ int ArucoEye::configure(std::string arucoListFile, std::string cameraParametersF
     return error;
 }
 
-bool ArucoEye::isTheCameraParametersSet()
+bool ArucoEye::isTheCameraParametersSet() const
 {
     return this->flagCameraParametersSet;
 }
@@ -426,7 +426,7 @@ int ArucoEye::run(unsigned int &numCodesDetected, unsigned int &numCodesReconstr
             {
                 if(TheCameraParameters.isValid())
                 {
-                    double theMarkerSize;
+                    float theMarkerSize;
                     if(!ArucoList.getCodeSizeById(theMarkerSize, TheDetectedMarkers[i].id))
                     {
                         TheDetectedMarkers[i].calculateExtrinsics(theMarkerSize,TheCameraParameters);
@@ -528,16 +528,34 @@ int ArucoEye::setInputImage(cv::Mat InputImageIn)
 }
 
 
-int ArucoEye::getOutputImage(cv::Mat &OutputImageOut)
+int ArucoEye::getOutputImage(cv::Mat &OutputImageOut) const
 {
     OutputImage.copyTo(OutputImageOut);
     return 0;
 }
 
 
-int ArucoEye::getMarkersList(std::vector<ArucoMarker> &TheMarkers3D)
+int ArucoEye::getMarkersList(std::vector<ArucoMarker> &TheMarkers) const
 {
-    TheMarkers3D=TheMarkers;
+    TheMarkers=this->TheMarkers;
+    return 0;
+}
+
+int ArucoEye::setMarkersList(const std::vector<ArucoMarker> TheMarkers)
+{
+    this->TheMarkers=TheMarkers;
+    return 0;
+}
+
+int ArucoEye::addMarkerToMarkersList(ArucoMarker TheMarker)
+{
+    this->TheMarkers.push_back(TheMarker);
+    return 0;
+}
+
+int ArucoEye::clearMarkersList()
+{
+    this->TheMarkers.clear();
     return 0;
 }
 

@@ -10,7 +10,7 @@
 //////////////////////////////////////////////////////
 
 
-#include "droneArucoEyeROSModule.h"
+#include "aruco_eye_ros_detector.h"
 
 
 
@@ -134,9 +134,6 @@ void ArucoEyeROS::readParameters()
     //
     ros::param::param<std::string>("~aruco_list_topic_name", arucoListTopicName, "aruco_eye/aruco_observation");
     std::cout<<"aruco_list_topic_name="<<arucoListTopicName<<std::endl;
-    //
-    ros::param::param<std::string>("~output_image_topic_name", outputImageTopicName, "aruco_eye/aruco_observation_image/image_raw");
-    std::cout<<"output_image_topic_name="<<outputImageTopicName<<std::endl;
 
 
 
@@ -175,16 +172,7 @@ int ArucoEyeROS::open()
 
     // Publisher aruco 3D pose
     arucoListPubl = nh.advertise<aruco_eye_msgs::MarkerList>(arucoListTopicName, 1, true);
-    // Publisher output image
-    outputImagePub = imageTransport->advertise(outputImageTopicName, 1);
 
-
-#ifdef DISPLAY_ARUCO_EYE
-    //Name
-    arucoEyeWindow="arucoEye";
-    //Create gui
-    cv::namedWindow(arucoEyeWindow, 1);
-#endif
 
     //End
     return 0;
@@ -223,6 +211,9 @@ void ArucoEyeROS::imageCallback(const sensor_msgs::ImageConstPtr& msg)
         // Header
         arucoListMsg.header.stamp=curr_stamp;
         arucoListMsg.header.frame_id=this->aruco_detector_frame_name;
+
+        // Image topic name
+        arucoListMsg.imageTopicName=imageSubs.getTopic();
     }
 
 
@@ -248,14 +239,38 @@ void ArucoEyeROS::imageCallback(const sensor_msgs::ImageConstPtr& msg)
         // Detected
         aruco::Marker TheArucoMarker=TheMarkers[i].getMarker();
 
+        // Header + frame names
         std::string child_name = aruco_marker_child_base_name+std::to_string(TheArucoMarker.id);
         std::string parent_name = aruco_detector_frame_name;
 
         if(arucoListPubl.getNumSubscribers()>0)
         {
+            // Time stamp
             TheMarkerMsg.header.stamp=curr_stamp;
+
+            // Frame name
             TheMarkerMsg.header.frame_id=child_name;
+
+            // Id
             TheMarkerMsg.id=TheArucoMarker.id;
+
+            // Size of the visual marker
+            TheMarkerMsg.size=TheArucoMarker.ssize;
+
+            // Image points
+            for(unsigned int i=0; i<TheArucoMarker.size(); i++)
+            {
+                aruco_eye_msgs::PointInImage ThePointI;
+                ThePointI.x=TheArucoMarker[i].x;
+                ThePointI.y=TheArucoMarker[i].y;
+                TheMarkerMsg.pointsInImage.push_back(ThePointI);
+            }
+
+            // Flag 3D reconstruction initialization
+            TheMarkerMsg.is3dReconstructed=false;
+
+            // Confidence
+            // TODO
         }
 
         // Reconstructed
@@ -269,10 +284,16 @@ void ArucoEyeROS::imageCallback(const sensor_msgs::ImageConstPtr& msg)
             // Fill the message
             if(arucoListPubl.getNumSubscribers()>0)
             {
+                // Flag
+                TheMarkerMsg.is3dReconstructed=true;
+
+                // Pose
                 geometry_msgs::Pose poseMsg;
                 tf::poseTFToMsg(transform, poseMsg);
                 TheMarkerMsg.pose.pose=poseMsg;
-                // TODO Covariance
+
+                // Covariance
+                // TODO
             }
 
         }
@@ -291,28 +312,6 @@ void ArucoEyeROS::imageCallback(const sensor_msgs::ImageConstPtr& msg)
         if(publishArucoList())
             return;
     }
-
-    // Draw aruco codes
-    drawArucoCodes(true,true);
-
-    // Publish Output Image
-    if(outputImagePub.getNumSubscribers()>0)
-    {
-        if(!MyArucoEye.getOutputImage(outputImageMat))
-        {
-            cv_bridge::CvImage out_msg;
-            out_msg.header.stamp = curr_stamp;
-            out_msg.encoding = sensor_msgs::image_encodings::BGR8;
-            out_msg.image = outputImageMat;
-            outputImagePub.publish(out_msg.toImageMsg());
-        }
-    }
-
-
-#ifdef DISPLAY_ARUCO_EYE
-    // Display
-    displayArucoCodes(arucoEyeWindow,1);
-#endif
 
 
     return;
@@ -352,18 +351,6 @@ bool ArucoEyeROS::publishArucoList()
     //end
     return 0;
 }
-
-int ArucoEyeROS::drawArucoCodes(bool drawDetectedCodes, bool draw3DReconstructedCodes)
-{
-    return MyArucoEye.drawDetectedArucoCodes(drawDetectedCodes, draw3DReconstructedCodes);
-}
-
-#ifdef DISPLAY_ARUCO_EYE
-char ArucoEyeROS::displayArucoCodes(std::string windowName, int waitingTime)
-{
-    return MyArucoEye.displayDetectedArucoCodes(windowName, waitingTime);
-}
-#endif
 
 
 tf::Transform ArucoEyeROS::arucoMarker2Tf(const aruco::Marker &marker)
