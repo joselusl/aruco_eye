@@ -27,7 +27,13 @@ ArucoEyeROS::ArucoEyeROS(int argc, char **argv)
     imageTransport=new image_transport::ImageTransport(nh);
     tfTransformBroadcaster=new tf::TransformBroadcaster;
 
+    // Init
     init();
+
+    // Read parameters
+
+
+    // End
     return;
 }
 
@@ -37,8 +43,11 @@ ArucoEyeROS::~ArucoEyeROS()
     // Delete
     delete imageTransport;
     delete tfTransformBroadcaster;
-    // CLose
+
+    // Close
     close();
+
+    // End
     return;
 }
 
@@ -89,7 +98,8 @@ int ArucoEyeROS::configureArucoEye(std::string arucoListFile, std::string camera
 
 void ArucoEyeROS::init()
 {
-
+    if(MyArucoEye.init())
+        return;
 
     return;
 }
@@ -97,7 +107,7 @@ void ArucoEyeROS::init()
 
 void ArucoEyeROS::close()
 {
-    if(!MyArucoEye.close())
+    if(MyArucoEye.close())
         return;
 
     return;
@@ -140,14 +150,8 @@ void ArucoEyeROS::readParameters()
     return;
 }
 
-int ArucoEyeROS::open()
+int ArucoEyeROS::configure()
 {
-    ros::NodeHandle nh;
-
-    // Read parameters
-    readParameters();
-
-
     //configure droneArucoEye
     int errorConfigureArucoEye=configureArucoEye(arucoListFile, cameraCalibrationFile);
     if(errorConfigureArucoEye > 0)
@@ -164,6 +168,14 @@ int ArucoEyeROS::open()
 #endif
     }
 
+    return 0;
+}
+
+int ArucoEyeROS::openROS()
+{
+    // NH
+    ros::NodeHandle nh;
+
     // Subscriber Image
     imageSubs = imageTransport->subscribe(imageTopicName, 1, &ArucoEyeROS::imageCallback, this);
     // Subscriber Camerainfo
@@ -173,6 +185,19 @@ int ArucoEyeROS::open()
     // Publisher aruco 3D pose
     arucoListPubl = nh.advertise<aruco_eye_msgs::MarkerList>(arucoListTopicName, 1, true);
 
+    return 0;
+}
+
+int ArucoEyeROS::open()
+{
+    // Read parameters
+    readParameters();
+
+    // Configure
+    configure();
+
+    // Open ROS
+    openROS();
 
     //End
     return 0;

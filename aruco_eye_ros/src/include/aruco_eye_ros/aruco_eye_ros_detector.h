@@ -162,12 +162,18 @@ public:
     void init();
     void close();
 
-    //Open
+    // Configure
+protected:
+    int configure();
+    int openROS();
+
+
+    //Open and Run
  public:
     int open();
-
     int run();
 
+    // Read parameters
 protected:
     void readParameters();
 
