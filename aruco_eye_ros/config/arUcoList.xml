@@ -1,48 +1,17 @@
 <arucoList>
 
-<!--
-	<arucoMarker>
-		<id>0</id> 
-		<size>0.123</size>
-	</arucoMarker>
-	
-	<arucoMarker>
-		<id>2</id> 
-		<size>0.08</size>
-	</arucoMarker>
-	
-	-->
-	
-	<!--
-	<arucoMarker>
-		<id>1</id> 
-		<size>0.173</size>
-	</arucoMarker>
-	
-	<arucoMarker>
-		<id>3</id> 
-		<size>0.173</size>
-	</arucoMarker>
-	
-	<arucoMarker>
-		<id>4</id> 
-		<size>0.173</size>
-	</arucoMarker>
-	
-	<arucoMarker>
-		<id>6</id> 
-		<size>0.173</size>
-	</arucoMarker>
-	-->
-
+<!-- Example of Aruco Marker with no size information. It will be detected but not 3D reconstructed -->
 	<arucoMarker>
 		<id>0</id>
-<!--			<size>0.253</size>  -->
 	</arucoMarker> 
+
+<!-- Example of Aruco Marker with size information. It will be detected and 3D reconstructed if the information related to the camera calibration is available -->
 	<arucoMarker>
 		<id>1</id>
 		<size>0.253</size>
 	</arucoMarker>
+
+<!-- Others -->
 	<arucoMarker>
 		<id>2</id>
 		<size>0.253</size>

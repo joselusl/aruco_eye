@@ -3,9 +3,9 @@
 	
 	<arg name="aruco_eye_ros_node_name" 	default="aruco_eye_ros_node" />
 
-  <arg name="aruco_list_file" default="$(find aruco_eye_core)/config/arUcoList.xml"/>
+  <arg name="aruco_list_file" default="$(find aruco_eye_ros)/config/arUcoList.xml"/>
 
-  <!-- <arg name="camera_calibration_file" default="$(find aruco_eye_core)/config/camera.yml"/> -->
+  <!-- <arg name="camera_calibration_file" default="$(find aruco_eye_ros)/config/camera.yml"/> -->
   <arg name="camera_calibration_file"/>
   <arg name="camera_info_topic_name" default="camera/camera_info"/>
 
