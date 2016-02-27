@@ -43,6 +43,8 @@ find_package(OpenCV REQUIRED)
 
 catkin_package(
     DEPENDS OpenCV
+    INCLUDE_DIRS ${ARUCO_ROS_INCLUDE_DIR}
+    LIBRARIES ${PROJECT_NAME}
     CATKIN_DEPENDS roscpp message_filters image_transport cv_bridge geometry_msgs tf aruco_eye_msgs aruco_eye_srvs aruco_eye_core
   )
 
