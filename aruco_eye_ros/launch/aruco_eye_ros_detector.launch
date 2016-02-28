@@ -16,7 +16,7 @@
   <arg name="aruco_list_topic_name" 	default="aruco_eye/aruco_observation" />
 
 
-	<node name="$(arg aruco_eye_ros_node_name)" pkg="aruco_eye_ros" type="aruco_eye_ros" output="screen">
+	<node name="$(arg aruco_eye_ros_node_name)" pkg="aruco_eye_ros" type="aruco_eye_ros_detector" output="screen">
 
     <param name="aruco_list_file" value="$(arg aruco_list_file)" type="string"/>
 

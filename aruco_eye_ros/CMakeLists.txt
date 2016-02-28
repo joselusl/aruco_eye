@@ -55,21 +55,21 @@ include_directories(${catkin_INCLUDE_DIRS})
 
 
 
-add_library(${PROJECT_NAME}_lib ${ARUCO_ROS_SOURCE_FILES} ${ARUCO_ROS_HEADER_FILES})
-add_dependencies(${PROJECT_NAME}_lib ${catkin_EXPORTED_TARGETS})
-target_link_libraries(${PROJECT_NAME}_lib ${OpenCV_LIBS})
-target_link_libraries(${PROJECT_NAME}_lib ${catkin_LIBRARIES})
-
-
-add_executable(${PROJECT_NAME} ${ARUCO_ROS_SOURCE_DIR}/aruco_eye_ros_detector_node.cpp)
+add_library(${PROJECT_NAME} ${ARUCO_ROS_SOURCE_FILES} ${ARUCO_ROS_HEADER_FILES})
 add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(${PROJECT_NAME} ${PROJECT_NAME}_lib)
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
 
+add_executable(${PROJECT_NAME}_detector ${ARUCO_ROS_SOURCE_DIR}/aruco_eye_ros_detector_node.cpp)
+add_dependencies(${PROJECT_NAME}_detector ${catkin_EXPORTED_TARGETS})
+target_link_libraries(${PROJECT_NAME}_detector ${PROJECT_NAME})
+target_link_libraries(${PROJECT_NAME}_detector ${OpenCV_LIBS})
+target_link_libraries(${PROJECT_NAME}_detector ${catkin_LIBRARIES})
+
+
 add_executable(${PROJECT_NAME}_display ${ARUCO_ROS_SOURCE_DIR}/aruco_eye_ros_display_node.cpp)
 add_dependencies(${PROJECT_NAME}_display ${catkin_EXPORTED_TARGETS})
-target_link_libraries(${PROJECT_NAME}_display ${PROJECT_NAME}_lib)
+target_link_libraries(${PROJECT_NAME}_display ${PROJECT_NAME})
 target_link_libraries(${PROJECT_NAME}_display ${OpenCV_LIBS})
 target_link_libraries(${PROJECT_NAME}_display ${catkin_LIBRARIES})

@@ -18,7 +18,7 @@ This is the repository of the aruco_eye metapackage. It is a ROS wrapper of the 
 	- [Pre-requirements](#pre-requirements)
 	- [Installation steps](#installation-steps)
 + [Running Instructions](#running-instructions)
-  - [aruco_eye_ros](#aruco_eye_ros)
+  - [aruco_eye_ros_detector](#aruco_eye_ros_detector)
     * [ROS Launcher](#ROS-Launcher)
     * [ROS Topics](#ROS-Topics)
     * [ROS Parameters](#ROS-Parameters)
@@ -67,7 +67,7 @@ And one ROS metapackage:
 This repository generates:
 
 + Libraries: several
-+ Executables: two, aruco_eye_ros and aruco_eye_ros_display
++ Executables: two, aruco_eye_ros_detector and aruco_eye_ros_display
 
 
 ## Repository Branches
@@ -149,11 +149,11 @@ Install all the system and ROS dependencies (for example, using apt-get).
 The package aruco_eye_ros included in this repository generates two ROS nodes that can be executed:
 
 
-## aruco_eye_ros
+## aruco_eye_ros_detector
 This node processes the given images searching for ArUco visual markers, publishing them in a ROS topic.
 
 ### ROS Launcher
-The package aruco_eye_ros includes a launcher called aruco_eye_ros.launch.
+The package aruco_eye_ros includes a launcher called aruco_eye_ros_detector.launch.
 
 ### ROS Topics
 Subscribed topics:
@@ -191,7 +191,7 @@ There are two configuration files. An example can be find in  aruco_eye_ros/conf
 
 
 ## aruco_eye_ros_display
-This node allows the visualization of the detected ArUco visual markers by the node aruco_eye_ros.
+This node allows the visualization of the detected ArUco visual markers by the node aruco_eye_ros_detector.
 
 ### ROS Launcher
 The package aruco_eye_ros includes a launcher called aruco_eye_ros_display.launch.
@@ -243,7 +243,7 @@ For more information related to the ArUco library or camera calibration, please 
 It exists another similar package called aruco (see [http://wiki.ros.org/aruco](http://wiki.ros.org/aruco) and [https://github.com/pal-robotics/aruco_ros](https://github.com/pal-robotics/aruco_ros)) with the following limitations compared to aruco_eye:
 
 + It is just a wrapper of the ArUco library with few examples and it does not implement a complete solution. The metapackage aruco_eye implements a complete solution for robotics.
-+ The detection and the drawing is done by the same node, what can be a problem in robotics, for example, when processing onboard and having a ground station for visualization. In aruco_eye is solved by splitting the detection and 3D reconstruction node (aruco_eye_ros node) and the drawind and visualization (aruco_eye_ros_display node),
++ The detection and the drawing is done by the same node, what can be a problem in robotics, for example, when processing onboard and having a ground station for visualization. In aruco_eye is solved by splitting the detection and 3D reconstruction node (aruco_eye_ros_detector node) and the drawind and visualization (aruco_eye_ros_display node),
 + It is hard to implement a big number of visual markers with different sizes. In aruco_eye is solved using an XML config file.
 
 
