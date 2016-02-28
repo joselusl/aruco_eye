@@ -141,7 +141,7 @@ protected:
     cv::Mat imageMat;
     //Subscriber
     image_transport::Subscriber imageSubs;
-    void imageCallback(const sensor_msgs::ImageConstPtr& msg);
+    virtual void imageCallback(const sensor_msgs::ImageConstPtr& msg);
 
 
     //Aruco Visual Markers detected

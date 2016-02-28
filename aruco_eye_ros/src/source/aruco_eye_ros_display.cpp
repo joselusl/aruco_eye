@@ -129,6 +129,18 @@ int ArucoEyeDisplayROS::open()
     // Read parameters
     readParameters();
 
+
+    // Configure
+    //configure droneArucoEye
+    int errorConfigureArucoEye=configureArucoEye(cameraCalibrationFile);
+    if(errorConfigureArucoEye > 0)
+    {
+#ifdef VERBOSE_ARUCO_EYE_ROS
+        cout<<"[AE-ROS] Partial Configuration of Aruco Eye"<<endl;
+#endif
+    }
+
+
     // Image transport
     imageTransport=new image_transport::ImageTransport(nh);
 
@@ -240,6 +252,9 @@ void ArucoEyeDisplayROS::imageAndArucoListCallback(const sensor_msgs::ImageConst
             TheMarker.push_back(ThePointInImage);
         }
 
+        // Id
+        TheMarker.id=arucoList->markers[i].id;
+
         // Size
         TheMarker.ssize=arucoList->markers[i].size;
 
@@ -276,6 +291,7 @@ void ArucoEyeDisplayROS::imageAndArucoListCallback(const sensor_msgs::ImageConst
 
             TheMarker.Tvec=cvTran;
             cv::Rodrigues(cvRot, TheMarker.Rvec);
+
         }
 
         // Push
