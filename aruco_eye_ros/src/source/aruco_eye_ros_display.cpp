@@ -85,8 +85,9 @@ void ArucoEyeDisplayROS::readParameters()
 {
     // Config files
     //
-    ros::param::param<std::string>("~camera_calibration_file", cameraCalibrationFile, "camera.yaml");
-    std::cout<<"cameraCalibrationFile="<<cameraCalibrationFile<<std::endl;
+    ros::param::param<std::string>("~camera_calibration_file", cameraCalibrationFile, "");
+    if(!cameraCalibrationFile.empty())
+        std::cout<<"cameraCalibrationFile="<<cameraCalibrationFile<<std::endl;
 
     // Other parameters
     // Display image
@@ -157,7 +158,7 @@ int ArucoEyeDisplayROS::open()
     arucoListSub->subscribe(nh, arucoListTopicName, 10);
 
     // messagesSyncronizer
-    messagesSyncronizer=new message_filters::Synchronizer<TheSyncPolicy>(TheSyncPolicy( 10 ));//, imageSubs, arucoListSub );
+    messagesSyncronizer=new message_filters::Synchronizer<TheSyncPolicy>(TheSyncPolicy( 10 ));
     messagesSyncronizer->connectInput(*imageSubs, *arucoListSub);
     messagesSyncronizer->registerCallback( boost::bind( &ArucoEyeDisplayROS::imageAndArucoListCallback, this, _1, _2 ) );
 
@@ -206,9 +207,9 @@ void ArucoEyeDisplayROS::imageAndArucoListCallback(const sensor_msgs::ImageConst
     // Check image topic
     if(arucoList->imageTopicName!=imageSubs->getTopic())
     {
+#ifdef VERBOSE_ARUCO_EYE_ROS
         std::cout<<"1="<<arucoList->imageTopicName<<std::endl;
         std::cout<<"2="<<imageSubs->getTopic()<<std::endl;
-#ifdef VERBOSE_ARUCO_EYE_ROS
         ROS_ERROR("Error with the topic names");
 #endif
         return;

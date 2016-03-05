@@ -7,13 +7,13 @@
 	</description>
 	<author email="jl.sanchez@upm.es">Jose Luis Sanchez-Lopez</author>
 	<maintainer email="jl.sanchez@upm.es">Jose Luis Sanchez-Lopez</maintainer>
-  	<license>BSD</license>
+	<license>BSD</license>
 	<url>http://ros.org/wiki/aruco_eye_core</url>
 
-  	<buildtool_depend>catkin</buildtool_depend>
+	<buildtool_depend>catkin</buildtool_depend>
 
-        <depend>lib_pugixml</depend>
-        <depend>aruco_lib</depend>
+  <depend>pugixml</depend>
+  <depend>aruco_lib</depend>
 
   
 </package>

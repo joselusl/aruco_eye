@@ -48,7 +48,7 @@
 #include "aruco_lib/aruco.h"
 
 //PUGIXML
-#include "pugixml.hpp"
+#include <pugixml/pugixml.hpp>
 
 
 

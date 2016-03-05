@@ -117,11 +117,13 @@ void ArucoEyeROS::readParameters()
 {
     // Config files
     //
-    ros::param::param<std::string>("~aruco_list_file", arucoListFile,"arUcoList.xml");
-    std::cout<<"arucoListFile="<<arucoListFile<<std::endl;
+    ros::param::param<std::string>("~aruco_list_file", arucoListFile, "");
+    if(!arucoListFile.empty())
+        std::cout<<"aruco_list_file="<<arucoListFile<<std::endl;
     //
-    ros::param::param<std::string>("~camera_calibration_file", cameraCalibrationFile, "camera.yaml");
-    std::cout<<"cameraCalibrationFile="<<cameraCalibrationFile<<std::endl;
+    ros::param::param<std::string>("~camera_calibration_file", cameraCalibrationFile, "");
+    if(!cameraCalibrationFile.empty())
+        std::cout<<"cameraCalibrationFile="<<cameraCalibrationFile<<std::endl;
 
     // TODO parameters of the aruco detector -> Now hardcoded!
     //

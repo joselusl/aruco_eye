@@ -9,7 +9,7 @@
   <arg name="display_output_image_service_name" default="aruco_eye/enable_display_output_image"/>
 
   <!-- <arg name="camera_calibration_file" default="$(find aruco_eye_ros)/config/camera.yml"/> -->
-  <arg name="camera_calibration_file"/>
+  <arg name="camera_calibration_file" default=""/>
   <arg name="camera_info_topic_name" default="camera/camera_info"/>
 
   <arg name="image_topic_name" 	default="camera/image_raw" />

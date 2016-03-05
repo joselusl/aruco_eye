@@ -311,6 +311,8 @@ bool ArucoEye::isTheCameraParametersSet() const
 
 int ArucoEye::setCameraParameters(std::string filename)
 {
+    if(filename.empty())
+        return 2;
     if ( !boost::filesystem::exists( filename ) )
     {
         std::cout << "Can't find the file: "<< filename << std::endl;
@@ -343,6 +345,8 @@ int ArucoEye::setCameraParameters(aruco::CameraParameters camParam)
 
 int ArucoEye::setArucoList(std::string arucoListFile)
 {
+    if(arucoListFile.empty())
+        return 2;
     if ( !boost::filesystem::exists( arucoListFile ) )
     {
         std::cout << "Can't find the file: "<< arucoListFile << std::endl;

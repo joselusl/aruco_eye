@@ -36,7 +36,7 @@ set(ARUCO_EYE_CORE_HEADER_FILES
 
 
 find_package(catkin REQUIRED
-		COMPONENTS lib_pugixml aruco_lib)
+		COMPONENTS pugixml aruco_lib)
 
 find_package(OpenCV REQUIRED)
 
@@ -47,7 +47,7 @@ catkin_package(
         INCLUDE_DIRS ${ARUCO_EYE_CORE_INCLUDE_DIR}
         LIBRARIES ${PROJECT_NAME}
         DEPENDS OpenCV Boost
-        CATKIN_DEPENDS lib_pugixml aruco_lib
+        CATKIN_DEPENDS pugixml aruco_lib
   )
 
 
