@@ -123,7 +123,7 @@ This metapackage depends on the following ROS packages:
 
 This metapackage depends on the following extra ROS packages:
 
-+ lib_pugixml: [https://bitbucket.org/joselusl/lib_pugixml.git](https://bitbucket.org/joselusl/lib_pugixml.git)
++ pugixml: [https://github.com/joselusl/pugixml](https://github.com/joselusl/pugixml)
 
 
 
@@ -131,14 +131,14 @@ This metapackage depends on the following extra ROS packages:
 
 
 ## Pre-requirements
-Install all the system and ROS dependencies (for example, using apt-get).
+Install all the system and ROS dependencies (for example, using rosdep install, or apt-get, or directly from source).
 
 
 ## Installation steps
 
 1. Create your ROS catkin workspace as usual.
-2. Inside your workspace, download the extra ROS package lib_pugixml:
-    git clone https://bitbucket.org/joselusl/lib_pugixml ./
+2. Inside your workspace, download the extra ROS package pugixml:
+    git clone https://github.com/joselusl/pugixml ./
 3. Inside your workspace, download the aruco_eye repository:
     git clone https://github.com/joselusl/aruco_eye ./
 4. Compile your ROS catkin workspace as usual.
@@ -292,3 +292,4 @@ Special thanks to:
 + Centre for Automation and Robotics (CAR): [http://www.car.upm-csic.es/](http://www.car.upm-csic.es/)
 + Consejo Superior de Investigaciones Cientificas (CSIC): [http://www.csic.es](http://www.csic.es)
 + Universidad Politecnica de Madrid (UPM): [http://www.upm.es](http://www.upm.es)
+
