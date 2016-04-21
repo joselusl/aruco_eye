@@ -140,6 +140,12 @@ int ArucoEyeDisplayROS::open()
         cout<<"[AE-ROS] Partial Configuration of Aruco Eye"<<endl;
 #endif
     }
+    else if(errorConfigureArucoEye < 0)
+    {
+#if 1 || VERBOSE_ARUCO_EYE_ROS
+        cout<<"[AE-ROS] Partial Configuration of Aruco Eye. Camera calibration needed"<<endl;
+#endif
+    }
 
 
     // Image transport
@@ -186,7 +192,10 @@ int ArucoEyeDisplayROS::open()
 void ArucoEyeDisplayROS::cameraInfoCallback(const sensor_msgs::CameraInfo &msg)
 {
     if(!MyArucoEye.setCameraParameters(rosCameraInfo2ArucoCamParams(msg, true)))
+    {
         cameraInfoSub.shutdown();
+        std::cout<<"Camera calibration parameters received!"<<std::endl;
+    }
 
     return;
 }
