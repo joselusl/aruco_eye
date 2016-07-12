@@ -267,6 +267,7 @@ ArucoEye::~ArucoEye()
 int ArucoEye::init()
 {
     flagNewImage=false;
+    flagCameraParametersSet=false;
 
     if(configureArucoDetector())
         return 1;
@@ -321,6 +322,7 @@ int ArucoEye::setCameraParameters(std::string filename)
     else
     {
         TheCameraParameters.readFromXMLFile(filename);
+        if(TheCameraParameters.isValid())
         {
             flagCameraParametersSet=true;
             return 0;

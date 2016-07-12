@@ -157,7 +157,12 @@ int ArucoEyeDisplayROS::open()
 
     // Subscriber Camerainfo
     if(!MyArucoEye.isTheCameraParametersSet())
+    {
+#if 1 || VERBOSE_ARUCO_EYE_ROS
+        std::cout<<"[AE-ROS] Subscribing to camera info topic name to get camera parameters"<<std::endl;
+#endif
         cameraInfoSub=nh.subscribe(camera_info_topic_name, 1, &ArucoEyeDisplayROS::cameraInfoCallback, this);
+    }
 
     // Subscriber aruco list
     arucoListSub=new message_filters::Subscriber<aruco_eye_msgs::MarkerList>();
@@ -194,7 +199,7 @@ void ArucoEyeDisplayROS::cameraInfoCallback(const sensor_msgs::CameraInfo &msg)
     if(!MyArucoEye.setCameraParameters(rosCameraInfo2ArucoCamParams(msg, true)))
     {
         cameraInfoSub.shutdown();
-        std::cout<<"Camera calibration parameters received!"<<std::endl;
+        std::cout<<"[AE_ROS] Camera calibration parameters received!"<<std::endl;
     }
 
     return;
