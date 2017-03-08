@@ -35,12 +35,14 @@ or implied, of Rafael Muñoz Salinas.
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/ml/ml.hpp>
+#include <opencv2/core/version.hpp>
 #include "exports.h"
 #include "board.h"
 #include "boarddetector.h"
 #include "cvdrawingutils.h"
 
-#define OPENCV_VERSION_3
+
+//#define OPENCV_VERSION_3
 
 class ARUCO_EXPORTS EMClassifier {
   public:
@@ -56,9 +58,10 @@ class ARUCO_EXPORTS EMClassifier {
     //   double probConj[256];
 
   private:
-#ifdef OPENCV_VERSION_3
+//#ifdef OPENCV_VERSION_3
+#if CV_MAJOR_VERSION == 3
     cv::Ptr< cv::ml::EM > _classifier;
-#else
+#elif CV_MAJOR_VERSION == 2
     cv::EM _classifier;
 #endif
     vector< uchar > _samples;

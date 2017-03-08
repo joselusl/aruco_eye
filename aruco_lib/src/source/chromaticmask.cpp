@@ -34,12 +34,12 @@ or implied, of Rafael Muñoz Salinas.
 /**
  */
 EMClassifier::EMClassifier(unsigned int nelements) {
-#ifdef OPENCV_VERSION_3
+#if  CV_MAJOR_VERSION == 3
     _classifier = cv::ml::EM::create();
     _classifier->setTermCriteria(cv::TermCriteria(cv::TermCriteria::COUNT, 4, FLT_EPSILON));
     _classifier->setClustersNumber(2);
     _classifier->setCovarianceMatrixType(cv::ml::EM::COV_MAT_DIAGONAL);
-#else
+#elif CV_MAJOR_VERSION == 2
     _classifier = cv::EM(2, cv::EM::COV_MAT_DIAGONAL, cv::TermCriteria(cv::TermCriteria::COUNT , 4, FLT_EPSILON));
 #endif
     _nelem = nelements;
@@ -97,9 +97,9 @@ void EMClassifier::train() {
         }
     }
 
-#ifdef OPENCV_VERSION_3
+#if   CV_MAJOR_VERSION == 3
     _classifier->trainEM(samples);
-#else
+#elif CV_MAJOR_VERSION == 2
     _classifier.train(samples);
 #endif
 
@@ -107,9 +107,9 @@ void EMClassifier::train() {
     for (unsigned int i = 0; i < 256; i++) {
         sampleAux.ptr< double >(0)[0] = i;
         cv::Mat probs;
-#ifdef OPENCV_VERSION_3
+#if   CV_MAJOR_VERSION == 3
         cv::Vec2f r = _classifier->predict2(sampleAux, probs);
-#else
+#elif CV_MAJOR_VERSION == 2
         cv::Vec2d r = _classifier.predict(sampleAux);
 #endif
         _prob[i] = exp(r[0]);
