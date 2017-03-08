@@ -40,6 +40,7 @@ or implied, of Rafael Muñoz Salinas.
 #include "boarddetector.h"
 #include "cvdrawingutils.h"
 
+#define OPENCV_VERSION_3
 
 class ARUCO_EXPORTS EMClassifier {
   public:
