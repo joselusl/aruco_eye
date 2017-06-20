@@ -48,6 +48,17 @@ Marker::Marker() {
 /**
  *
  */
+Marker::Marker(int _id) {
+    id = _id;
+    ssize = -1;
+    Rvec.create(3, 1, CV_32FC1);
+    Tvec.create(3, 1, CV_32FC1);
+    for (int i = 0; i < 3; i++)
+        Tvec.at< float >(i, 0) = Rvec.at< float >(i, 0) = -999999;
+}
+/**
+ *
+ */
 Marker::Marker(const Marker &M) : std::vector< cv::Point2f >(M) {
     M.Rvec.copyTo(Rvec);
     M.Tvec.copyTo(Tvec);
@@ -215,13 +226,16 @@ void Marker::OgreGetPoseParameters(double position[3], double orientation[4]) th
 void Marker::draw(Mat &in, Scalar color, int lineWidth, bool writeId) const {
     if (size() != 4)
         return;
+    if (lineWidth==-1)//auto
+        lineWidth= std::max(1.f,float(in.cols)/1000.f);
     cv::line(in, (*this)[0], (*this)[1], color, lineWidth, CV_AA);
     cv::line(in, (*this)[1], (*this)[2], color, lineWidth, CV_AA);
     cv::line(in, (*this)[2], (*this)[3], color, lineWidth, CV_AA);
     cv::line(in, (*this)[3], (*this)[0], color, lineWidth, CV_AA);
-    cv::rectangle(in, (*this)[0] - Point2f(2, 2), (*this)[0] + Point2f(2, 2), Scalar(0, 0, 255, 255), lineWidth, CV_AA);
-    cv::rectangle(in, (*this)[1] - Point2f(2, 2), (*this)[1] + Point2f(2, 2), Scalar(0, 255, 0, 255), lineWidth, CV_AA);
-    cv::rectangle(in, (*this)[2] - Point2f(2, 2), (*this)[2] + Point2f(2, 2), Scalar(255, 0, 0, 255), lineWidth, CV_AA);
+    auto p2=Point2f(2*lineWidth, 2*lineWidth);
+    cv::rectangle(in, (*this)[0] - p2, (*this)[0] + p2, Scalar(0, 0, 255, 255), lineWidth, CV_AA);
+    cv::rectangle(in, (*this)[1] - p2, (*this)[1] + p2, Scalar(0, 255, 0, 255), lineWidth, CV_AA);
+    cv::rectangle(in, (*this)[2] - p2, (*this)[2] + p2, Scalar(255, 0, 0, 255), lineWidth, CV_AA);
     if (writeId) {
         char cad[100];
         sprintf(cad, "id=%d", id);
@@ -233,7 +247,7 @@ void Marker::draw(Mat &in, Scalar color, int lineWidth, bool writeId) const {
         }
         cent.x /= 4.;
         cent.y /= 4.;
-        putText(in, cad, cent, FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255 - color[0], 255 - color[1], 255 - color[2], 255), 2);
+        putText(in, cad, cent, FONT_HERSHEY_SIMPLEX,  std::max(0.5f,float(lineWidth)*0.3f), Scalar(255 - color[0], 255 - color[1], 255 - color[2], 255), std::max(lineWidth,2));
     }
 }
 
@@ -257,40 +271,26 @@ void Marker::calculateExtrinsics(float markerSizeMeters, cv::Mat camMatrix, cv::
     if (camMatrix.rows == 0 || camMatrix.cols == 0)
         throw cv::Exception(9004, "CameraMatrix is empty", "calculateExtrinsics", __FILE__, __LINE__);
 
-    double halfSize = markerSizeMeters / 2.;
-    cv::Mat ObjPoints(4, 3, CV_32FC1);
-    ObjPoints.at< float >(1, 0) = -halfSize;
-    ObjPoints.at< float >(1, 1) = halfSize;
-    ObjPoints.at< float >(1, 2) = 0;
-    ObjPoints.at< float >(2, 0) = halfSize;
-    ObjPoints.at< float >(2, 1) = halfSize;
-    ObjPoints.at< float >(2, 2) = 0;
-    ObjPoints.at< float >(3, 0) = halfSize;
-    ObjPoints.at< float >(3, 1) = -halfSize;
-    ObjPoints.at< float >(3, 2) = 0;
-    ObjPoints.at< float >(0, 0) = -halfSize;
-    ObjPoints.at< float >(0, 1) = -halfSize;
-    ObjPoints.at< float >(0, 2) = 0;
+    vector<cv::Point3f> objpoints=get3DPoints(markerSizeMeters);
 
-    cv::Mat ImagePoints(4, 2, CV_32FC1);
 
-    // Set image points from the marker
-    for (int c = 0; c < 4; c++) {
-        ImagePoints.at< float >(c, 0) = ((*this)[c].x);
-        ImagePoints.at< float >(c, 1) = ((*this)[c].y);
-    }
 
     cv::Mat raux, taux;
-    cv::solvePnP(ObjPoints, ImagePoints, camMatrix, distCoeff, raux, taux);
+    cv::solvePnP(objpoints, *this, camMatrix, distCoeff, raux, taux);
     raux.convertTo(Rvec, CV_32F);
     taux.convertTo(Tvec, CV_32F);
-    // rotate the X axis so that Y is perpendicular to the marker plane
+     // rotate the X axis so that Y is perpendicular to the marker plane
     if (setYPerpendicular)
         rotateXAxis(Rvec);
     ssize = markerSizeMeters;
     // cout<<(*this)<<endl;
 }
+vector<cv::Point3f> Marker::get3DPoints(float msize)
+{
+    double halfSize = msize / 2.;
+    return {cv::Point3f(-halfSize,halfSize,0), cv::Point3f(halfSize,halfSize,0),cv::Point3f(halfSize,-halfSize,0),cv::Point3f(-halfSize,-halfSize,0)};
 
+}
 
 /**
 */
@@ -300,7 +300,7 @@ void Marker::rotateXAxis(Mat &rotation) {
     Rodrigues(rotation, R);
     // create a rotation matrix for x axis
     cv::Mat RX = cv::Mat::eye(3, 3, CV_32F);
-    float angleRad = M_PI / 2;
+    float angleRad = 3.14159265359 / 2.;
     RX.at< float >(1, 1) = cos(angleRad);
     RX.at< float >(1, 2) = -sin(angleRad);
     RX.at< float >(2, 1) = sin(angleRad);
@@ -348,4 +348,32 @@ float Marker::getPerimeter() const {
         sum += norm((*this)[i] - (*this)[(i + 1) % 4]);
     return sum;
 }
+//saves to a binary stream
+void Marker::toStream(ostream &str)const{
+    assert(Rvec.type()==CV_32F && Tvec.type()==CV_32F);
+    str.write((char*)&id,sizeof(int));
+    str.write((char*)&ssize,sizeof(float));
+    str.write((char*)Rvec.ptr<float>(0),3*sizeof(float));
+    str.write((char*)Tvec.ptr<float>(0),3*sizeof(float));
+    //write the 2d points
+    uint32_t np=size();
+    str.write((char*) &np, sizeof(np));
+    for(size_t i=0;i<size();i++) str.write((char*) &at(i), sizeof(cv::Point2f));
+
+}
+//reads from a binary stream
+void Marker::fromStream(istream &str){
+    Rvec.create(1,3,CV_32F);
+    Tvec.create(1,3,CV_32F);
+    str.read((char*)&id,sizeof(int));
+    str.read((char*)&ssize,sizeof(float));
+    str.read((char*)Rvec.ptr<float>(0),3*sizeof(float));
+    str.read((char*)Tvec.ptr<float>(0),3*sizeof(float));
+    uint32_t np;
+    str.read((char*) &np, sizeof(np));
+    resize(np);
+    for(size_t i=0;i<size();i++) str.read((char*) &(*this)[i], sizeof(cv::Point2f));
+
+}
+
 }

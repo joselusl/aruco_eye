@@ -101,46 +101,7 @@ cv::Point3f CameraParameters::getCameraLocation(cv::Mat Rvec, cv::Mat Tvec) {
     return cv::Point3f(m44.at< float >(0, 0), m44.at< float >(0, 1), m44.at< float >(0, 2));
 }
 
-/**Reads the camera parameters from file
- */
-void CameraParameters::readFromFile(string path) throw(cv::Exception) {
 
-    ifstream file(path.c_str());
-    if (!file)
-        throw cv::Exception(9005, "could not open file:" + path, "CameraParameters::readFromFile", __FILE__, __LINE__);
-    // Create the matrices
-    Distorsion = cv::Mat::zeros(4, 1, CV_32FC1);
-    CameraMatrix = cv::Mat::eye(3, 3, CV_32FC1);
-    char line[1024];
-    while (!file.eof()) {
-        file.getline(line, 1024);
-        char cmd[20];
-        float fval;
-        if (sscanf(line, "%s = %f", cmd, &fval) == 2) {
-            string scmd(cmd);
-            if (scmd == "fx")
-                CameraMatrix.at< float >(0, 0) = fval;
-            else if (scmd == "cx")
-                CameraMatrix.at< float >(0, 2) = fval;
-            else if (scmd == "fy")
-                CameraMatrix.at< float >(1, 1) = fval;
-            else if (scmd == "cy")
-                CameraMatrix.at< float >(1, 2) = fval;
-            else if (scmd == "k1")
-                Distorsion.at< float >(0, 0) = fval;
-            else if (scmd == "k2")
-                Distorsion.at< float >(1, 0) = fval;
-            else if (scmd == "p1")
-                Distorsion.at< float >(2, 0) = fval;
-            else if (scmd == "p2")
-                Distorsion.at< float >(3, 0) = fval;
-            else if (scmd == "width")
-                CamSize.width = fval;
-            else if (scmd == "height")
-                CamSize.height = fval;
-        }
-    }
-}
 /**Saves this to a file
   */
 void CameraParameters::saveToFile(string path, bool inXML) throw(cv::Exception) {
@@ -185,6 +146,7 @@ void CameraParameters::resize(cv::Size size) throw(cv::Exception) {
     CameraMatrix.at< float >(0, 2) *= AxFactor;
     CameraMatrix.at< float >(1, 1) *= AyFactor;
     CameraMatrix.at< float >(1, 2) *= AyFactor;
+    CamSize=size;
 }
 
 /****

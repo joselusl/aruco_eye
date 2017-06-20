@@ -37,35 +37,10 @@ set(LIB_ARUCO_SOURCE_DIR
 set(LIB_ARUCO_INCLUDE_DIR
 	src/include)
 
-set(LIB_ARUCO_SOURCE_FILES
-        ${LIB_ARUCO_SOURCE_DIR}/ar_omp
-        ${LIB_ARUCO_SOURCE_DIR}/arucofidmarkers.cpp
-        ${LIB_ARUCO_SOURCE_DIR}/board.cpp
-        ${LIB_ARUCO_SOURCE_DIR}/boarddetector.cpp
-        ${LIB_ARUCO_SOURCE_DIR}/cameraparameters.cpp
-        ${LIB_ARUCO_SOURCE_DIR}/chromaticmask
-        ${LIB_ARUCO_SOURCE_DIR}/cvdrawingutils.cpp
-        ${LIB_ARUCO_SOURCE_DIR}/highlyreliablemarkers
-        ${LIB_ARUCO_SOURCE_DIR}/marker.cpp
-        ${LIB_ARUCO_SOURCE_DIR}/markerdetector.cpp
-        ${LIB_ARUCO_SOURCE_DIR}/subpixelcorner
-)
- 
-set(LIB_ARUCO_HEADER_FILES
-        ${LIB_ARUCO_INCLUDE_DIR}/aruco_lib/ar_omp
-        ${LIB_ARUCO_INCLUDE_DIR}/aruco_lib/aruco.h
-        ${LIB_ARUCO_INCLUDE_DIR}/aruco_lib/arucofidmarkers.h
-        ${LIB_ARUCO_INCLUDE_DIR}/aruco_lib/board.h
-        ${LIB_ARUCO_INCLUDE_DIR}/aruco_lib/boarddetector.h
-        ${LIB_ARUCO_INCLUDE_DIR}/aruco_lib/cameraparameters.h
-        ${LIB_ARUCO_INCLUDE_DIR}/aruco_lib/chromaticmask
-        ${LIB_ARUCO_INCLUDE_DIR}/aruco_lib/cvdrawingutils.h
-        ${LIB_ARUCO_INCLUDE_DIR}/aruco_lib/exports.h
-        ${LIB_ARUCO_INCLUDE_DIR}/aruco_lib/highlyreliablemarkers
-        ${LIB_ARUCO_INCLUDE_DIR}/aruco_lib/marker.h
-        ${LIB_ARUCO_INCLUDE_DIR}/aruco_lib/markerdetector.h
-        ${LIB_ARUCO_INCLUDE_DIR}/aruco_lib/subpixelcorner
-)
+FILE(GLOB_RECURSE LIB_ARUCO_HEADER_FILES 
+    ${LIB_ARUCO_INCLUDE_DIR}/*.h*)
+FILE(GLOB_RECURSE LIB_ARUCO_SOURCE_FILES
+    ${LIB_ARUCO_SOURCE_DIR}/*.c*)
 
 
 find_package(catkin REQUIRED)
@@ -82,6 +57,7 @@ catkin_package(
 
 
 include_directories(${LIB_ARUCO_INCLUDE_DIR}/aruco_lib)
+include_directories(${LIB_ARUCO_INCLUDE_DIR}/aruco_lib/markerlabelers)
 include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${catkin_INCLUDE_DIRS})
 

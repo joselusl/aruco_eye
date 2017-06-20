@@ -25,9 +25,13 @@ The views and conclusions contained in the software and documentation are those 
 authors and should not be interpreted as representing official policies, either expressed
 or implied, of Rafael Muñoz Salinas.
 ********************************/
-#include "board.h"
+#include "markermap.h"
 #include <opencv2/calib3d/calib3d.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/highgui/highgui.hpp>
+
 #include <fstream>
+#include "dictionary.h"
 using namespace std;
 using namespace cv;
 namespace aruco {
@@ -36,46 +40,30 @@ namespace aruco {
 *
 *
 */
-BoardConfiguration::BoardConfiguration() { mInfoType = NONE; }
+MarkerMap::MarkerMap() { mInfoType = NONE; }
 /**
 *
 *
 */
-BoardConfiguration::BoardConfiguration(string filePath) throw(cv::Exception) {
+MarkerMap::MarkerMap(string filePath) throw(cv::Exception) {
     mInfoType = NONE;
     readFromFile(filePath);
 }
-/**
-*
-*
-*/
-BoardConfiguration::BoardConfiguration(const BoardConfiguration &T) : vector< MarkerInfo >(T) {
-    //     MarkersInfo=T.MarkersInfo;
-    mInfoType = T.mInfoType;
-}
+
 
 /**
 *
 *
 */
-BoardConfiguration &BoardConfiguration::operator=(const BoardConfiguration &T) {
-    //     MarkersInfo=T.MarkersInfo;
-    vector< MarkerInfo >::operator=(T);
-    mInfoType = T.mInfoType;
-    return *this;
-}
-/**
-*
-*
-*/
-void BoardConfiguration::saveToFile(string sfile) throw(cv::Exception) {
+void MarkerMap::saveToFile(string sfile) throw(cv::Exception) {
 
     cv::FileStorage fs(sfile, cv::FileStorage::WRITE);
     saveToFile(fs);
 }
 /**Saves the board info to a file
 */
-void BoardConfiguration::saveToFile(cv::FileStorage &fs) throw(cv::Exception) {
+void MarkerMap::saveToFile(cv::FileStorage &fs) throw(cv::Exception) {
+    fs<<"aruco_bc_dict"<<dictionary;
     fs << "aruco_bc_nmarkers" << (int)size();
     fs << "aruco_bc_mInfoType" << (int)mInfoType;
     fs << "aruco_bc_markers"
@@ -86,7 +74,7 @@ void BoardConfiguration::saveToFile(cv::FileStorage &fs) throw(cv::Exception) {
 
         fs << "corners"
            << "[:";
-        for (int c = 0; c < at(i).size(); c++)
+        for (size_t c = 0; c < at(i).size(); c++)
             fs << at(i)[c];
         fs << "]";
         fs << "}";
@@ -98,23 +86,23 @@ void BoardConfiguration::saveToFile(cv::FileStorage &fs) throw(cv::Exception) {
 *
 *
 */
-void BoardConfiguration::readFromFile(string sfile) throw(cv::Exception) {
+void MarkerMap::readFromFile(string sfile) throw(cv::Exception) {
     try {
         cv::FileStorage fs(sfile, cv::FileStorage::READ);
         readFromFile(fs);
     } catch (std::exception &ex) {
-        throw cv::Exception(81818, "BoardConfiguration::readFromFile", ex.what() + string(" file=)") + sfile, __FILE__, __LINE__);
+        throw cv::Exception(81818, "MarkerMap::readFromFile", ex.what() + string(" file=)") + sfile, __FILE__, __LINE__);
     }
 }
 
 
 /**Reads board info from a file
 */
-void BoardConfiguration::readFromFile(cv::FileStorage &fs) throw(cv::Exception) {
+void MarkerMap::readFromFile(cv::FileStorage &fs) throw(cv::Exception) {
     int aux = 0;
     // look for the nmarkers
     if (fs["aruco_bc_nmarkers"].name() != "aruco_bc_nmarkers")
-        throw cv::Exception(81818, "BoardConfiguration::readFromFile", "invalid file type", __FILE__, __LINE__);
+        throw cv::Exception(81818, "MarkerMap::readFromFile", "invalid file type", __FILE__, __LINE__);
     fs["aruco_bc_nmarkers"] >> aux;
     resize(aux);
     fs["aruco_bc_mInfoType"] >> mInfoType;
@@ -127,16 +115,20 @@ void BoardConfiguration::readFromFile(cv::FileStorage &fs) throw(cv::Exception) 
             vector< float > coordinates3d;
             (*itc) >> coordinates3d;
             if (coordinates3d.size() != 3)
-                throw cv::Exception(81818, "BoardConfiguration::readFromFile", "invalid file type 3", __FILE__, __LINE__);
+                throw cv::Exception(81818, "MarkerMap::readFromFile", "invalid file type 3", __FILE__, __LINE__);
             cv::Point3f point(coordinates3d[0], coordinates3d[1], coordinates3d[2]);
             at(i).push_back(point);
         }
     }
+
+    if (fs["aruco_bc_dict"].name()=="aruco_bc_dict")
+     fs["aruco_bc_dict"] >> dictionary;
+
 }
 
 /**
  */
-int BoardConfiguration::getIndexOfMarkerId(int id) const {
+int MarkerMap::getIndexOfMarkerId(int id) const {
 
     for (size_t i = 0; i < size(); i++)
         if (at(i).id == id)
@@ -146,17 +138,15 @@ int BoardConfiguration::getIndexOfMarkerId(int id) const {
 
 /**
  */
-const MarkerInfo &BoardConfiguration::getMarkerInfo(int id) const throw(cv::Exception) {
+const Marker3DInfo &MarkerMap::getMarker3DInfo(int id) const throw(cv::Exception) {
     for (size_t i = 0; i < size(); i++)
         if (at(i).id == id)
             return at(i);
-    throw cv::Exception(111, "BoardConfiguration::getMarkerInfo", "Marker with the id given is not found", __FILE__, __LINE__);
+    throw cv::Exception(111, "MarkerMap::getMarker3DInfo", "Marker with the id given is not found", __FILE__, __LINE__);
 }
 
 
-/**
- */
-void Board::glGetModelViewMatrix(double modelview_matrix[16]) throw(cv::Exception) {
+void  __glGetModelViewMatrix(double modelview_matrix[16],const cv::Mat &Rvec,const cv::Mat &Tvec) throw(cv::Exception) {
     // check if paremeters are valid
     bool invalid = false;
     for (int i = 0; i < 3 && !invalid; i++) {
@@ -210,7 +200,7 @@ void Board::glGetModelViewMatrix(double modelview_matrix[16]) throw(cv::Exceptio
 /****
  *
  */
-void Board::OgreGetPoseParameters(double position[3], double orientation[4]) throw(cv::Exception) {
+void __OgreGetPoseParameters(double position[3], double orientation[4],const cv::Mat &Rvec,const cv::Mat &Tvec) throw(cv::Exception) {
     // check if paremeters are valid
     bool invalid = false;
     for (int i = 0; i < 3 && !invalid; i++) {
@@ -294,88 +284,129 @@ void Board::OgreGetPoseParameters(double position[3], double orientation[4]) thr
     }
 }
 
-/**
- */
-void Board::draw(cv::Mat &im, cv::Scalar color, int lineWidth, bool writeId) {
-    for (size_t i = 0; i < size(); i++) {
-        at(i).draw(im, color, lineWidth, writeId);
-    }
-}
-
-/**Save this from a file
-  */
-void Board::saveToFile(string filePath) throw(cv::Exception) {
-    cv::FileStorage fs(filePath, cv::FileStorage::WRITE);
-
-    fs << "aruco_bo_rvec" << Rvec;
-    fs << "aruco_bo_tvec" << Tvec;
-    // now, the markers
-    fs << "aruco_bo_nmarkers" << (int)size();
-    fs << "aruco_bo_markers"
-       << "[";
-    for (size_t i = 0; i < size(); i++) {
-        fs << "{:"
-           << "id" << at(i).id;
-        fs << "corners"
-           << "[:";
-        for (int c = 0; c < at(i).size(); c++)
-            fs << at(i)[c];
-        fs << "]";
-        fs << "}";
-    }
-    fs << "]";
-    // save configuration file
-    conf.saveToFile(fs);
-
-
-
-    //  readFromFile(fs);
-}
-/**Read  this from a file
- */
-void Board::readFromFile(string filePath) throw(cv::Exception) {
-    cv::FileStorage fs(filePath, cv::FileStorage::READ);
-    if (fs["aruco_bo_nmarkers"].name() != "aruco_bo_nmarkers")
-        throw cv::Exception(81818, "Board::readFromFile", "invalid file type:", __FILE__, __LINE__);
-
-
-
-    int aux = 0;
-    // look for the nmarkers
-    fs["aruco_bo_nmarkers"] >> aux;
-    resize(aux);
-    fs["aruco_bo_rvec"] >> Rvec;
-    fs["aruco_bo_tvec"] >> Tvec;
-
-    cv::FileNode markers = fs["aruco_bo_markers"];
-    int i = 0;
-    for (FileNodeIterator it = markers.begin(); it != markers.end(); ++it, i++) {
-        at(i).id = (*it)["id"];
-        int ncorners = (*it)["ncorners"];
-        at(i).resize(ncorners);
-        FileNode FnCorners = (*it)["corners"];
-        int c = 0;
-        for (FileNodeIterator itc = FnCorners.begin(); itc != FnCorners.end(); ++itc, c++) {
-            vector< float > coordinates2d;
-            (*itc) >> coordinates2d;
-            if (coordinates2d.size() != 2)
-                throw cv::Exception(81818, "Board::readFromFile", "invalid file type 2", __FILE__, __LINE__);
-            cv::Point2f point;
-            point.x = coordinates2d[0];
-            point.y = coordinates2d[1];
-            at(i).push_back(point);
-        }
-    }
-
-    conf.readFromFile(fs);
-}
 
 /**
 */
-void BoardConfiguration::getIdList(std::vector< int > &ids, bool append) const {
+void MarkerMap::getIdList(std::vector< int > &ids, bool append) const {
     if (!append)
         ids.clear();
     for (size_t i = 0; i < size(); i++)
         ids.push_back(at(i).id);
 }
+
+MarkerMap   MarkerMap::convertToMeters(float markerSize_meters)throw (cv::Exception){
+
+    if (!isExpressedInPixels())
+        throw cv::Exception(-1,"The board is not expressed in pixels",  "MarkerMap::convertToMeters", __FILE__, __LINE__);
+    // first, we are assuming all markers are equally sized. So, lets get the size in pixels
+    int markerSizePix = cv::norm(at(0)[0] - at(0)[1]);
+    MarkerMap BInfo(*this);
+    BInfo.mInfoType = MarkerMap::METERS;
+    // now, get the size of a pixel, and change scale
+    float pixSize = markerSize_meters / float(markerSizePix);
+    cout << markerSize_meters << " " << float(markerSizePix) << " " << pixSize << endl;
+    for (size_t i = 0; i < BInfo.size(); i++)
+        for (int c = 0; c < 4; c++) {
+            BInfo[i][c] *= pixSize;
+        }
+    return BInfo;
+}
+cv::Mat MarkerMap::getImage(float METER2PIX)const throw (cv::Exception){
+
+    if (mInfoType==NONE)
+        throw cv::Exception(-1,"The board is not valid mInfoType==NONE  ",  "MarkerMap::getImage", __FILE__, __LINE__);
+    if (METER2PIX<=0 && mInfoType!=PIX)
+        throw cv::Exception(-1,"The board is not expressed in pixels and not METER2PIX indicated",  "MarkerMap::getImage", __FILE__, __LINE__);
+
+    auto Dict=Dictionary::loadPredefined(dictionary);
+
+    //get image limits
+    cv::Point pmin(std::numeric_limits<int>::max(),std::numeric_limits<int>::max()),pmax(std::numeric_limits<int>::lowest(),std::numeric_limits<int>::lowest());
+    for(auto b:*this){
+        for(auto p:b){
+            pmin.x=min(int(p.x),pmin.x);
+            pmin.y=min(int(p.y),pmin.y);
+            pmax.x=max(int(p.x+0.5),pmax.x);
+            pmax.y=max(int(p.y+0.5),pmax.y);
+            assert(p.z==0);
+        }
+    }
+
+    cv::Point psize=pmax-pmin;
+     cv::Mat image(cv::Size( psize.x,psize.y),CV_8UC1);
+    image.setTo(cv::Scalar::all(255));
+
+    vector<Marker3DInfo> p3d=*this;
+    //the points must be moved from a real reference system to image reference sysmte (y positive is inverse)
+     for(auto &m:p3d)
+        for(auto &p:m){
+        p-=cv::Point3f(pmin.x,pmax.y,0);
+        //now, use inverse y
+        p.y=-p.y;
+    }
+    for(auto m:p3d)
+    {
+        //get size and find size of this
+        float size=cv::norm( m[0]-m[1]);
+         auto im1=Dict.getMarkerImage_id(m.id,int(size/8));
+         cv::Mat im2;
+        //now resize to fit
+        cv::resize(im1,im2,cv::Size(size,size));
+         //copy in correct position
+        auto ry=cv::Range(int(m[0].y),int(m[2].y) ) ;
+        auto rx=cv::Range(int(m[0].x),int(m[2].x));
+         cv::Mat sub=image(ry,rx);
+        im2.copyTo(sub);
+    }
+    return image;
+}
+
+std::vector<int> MarkerMap::getIndices(vector<aruco::Marker> &markers)
+{
+    std::vector<int> indices;
+    for(size_t i=0;i<markers.size();i++){
+        bool found=false;
+        for(size_t j=0;j<size() &&!found;j++){
+            if (markers[i].id==at(j).id){
+                found=true;
+                indices.push_back(i);
+            }
+        }
+    }
+    return indices;
+}
+void MarkerMap::toStream(std::ostream &str){
+    str<<mInfoType<<" " <<size()<<" ";
+    for(size_t i=0;i<size();i++) {at(i).toStream(str); }
+    //write dic string info
+    str<<dictionary;
+}
+void MarkerMap::fromStream(std::istream &str){
+    int s; str>>mInfoType>>s;resize(s);
+    for(size_t i=0;i<size();i++) at(i).fromStream(str);
+    str>>dictionary;
+}
+pair<cv::Mat,cv::Mat> MarkerMap::calculateExtrinsics(const std::vector<aruco::Marker> &markers ,float markerSize, cv::Mat CameraMatrix, cv::Mat Distorsion   ) throw(cv::Exception){
+    vector<cv::Point2f> p2d;
+    MarkerMap m_meters;
+    if (isExpressedInPixels())
+        m_meters=convertToMeters(markerSize);
+    else m_meters=*this;
+    vector<cv::Point3f> p3d;
+    for(auto marker:markers){
+        auto it=find(m_meters.begin(),m_meters.end(),marker.id);
+        if ( it!=m_meters.end()){//is the marker part of the map?
+            for(auto p:marker)  p2d.push_back(p);
+            for(auto p:*it)  p3d.push_back(p);
+        }
+    }
+
+    cv::Mat rvec,tvec;
+    if (p2d.size()!=0){//no points in the vector
+        cv::solvePnPRansac(p3d,p2d,CameraMatrix,Distorsion,rvec,tvec);
+    }
+    return make_pair(rvec,tvec);
+
+}
+
 };

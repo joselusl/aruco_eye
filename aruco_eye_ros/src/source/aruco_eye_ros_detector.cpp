@@ -58,12 +58,10 @@ int ArucoEyeROS::configureArucoEye(std::string arucoListFile, std::string camera
     int error=0;
 
     //configure aruco detector
-    if(MyArucoEye.configureArucoDetector(ARUCO_EYE_CONFIG_enableErosion,
-                                          ARUCO_EYE_CONFIG_thresholdMethod,
+    if(MyArucoEye.configureArucoDetector(ARUCO_EYE_CONFIG_thresholdMethod,
                                           ARUCO_EYE_CONFIG_ThresParam1,
                                           ARUCO_EYE_CONFIG_ThresParam2,
                                           ARUCO_EYE_CONFIG_methodCornerRefinement,
-                                          ARUCO_EYE_CONFIG_ThePyrDownLevel,
                                           ARUCO_EYE_CONFIG_minSize,
                                           ARUCO_EYE_CONFIG_maxSize) )
     {

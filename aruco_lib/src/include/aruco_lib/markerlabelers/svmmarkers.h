@@ -1,5 +1,4 @@
-/**
-
+/*****************************
 Copyright 2011 Rafael Muñoz Salinas. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are
@@ -25,12 +24,50 @@ ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 The views and conclusions contained in the software and documentation are those of the
 authors and should not be interpreted as representing official policies, either expressed
 or implied, of Rafael Muñoz Salinas.
-*/
+********************************/
 
-#ifdef USE_OMP
-#include <omp.h>
-#else
-int omp_get_max_threads();
-int omp_get_thread_num();
-//int omp_set_num_threads(int);
-#endif
+#ifndef SVMMARKERS_H
+#define SVMMARKERS_H
+
+#include "../markerlabeler.h"
+
+
+namespace aruco {
+
+
+/**
+ * SVM Marker Detector Class
+ *
+ *
+ */
+namespace impl{
+    class SVMMarkers;
+}
+
+class   SVMMarkers: public MarkerLabeler {
+    impl::SVMMarkers *_impl;
+  public:
+
+    SVMMarkers();
+    virtual ~SVMMarkers(){}
+    /**
+     * @brief getName
+     * @return
+     */
+    std::string getName()const{return "SVM";}
+
+    //loads the svm file that detects the markers
+    bool load(std::string path="")throw (cv::Exception);
+    /**
+     * Detect marker in a canonical image.
+     * Return marker id in 0 rotation, or -1 if not found
+     * Assign the detected rotation of the marker to nRotation
+     */
+     bool detect(const cv::Mat &in, int & marker_id,int &nRotations) ;
+     int getBestInputSize();
+};
+
+}
+
+
+#endif // SVMMARKERS_H

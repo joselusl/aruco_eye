@@ -73,12 +73,10 @@
 
 // configurations
 // TODO
-const bool ARUCO_EYE_CONFIG_enableErosion=false;
 const aruco::MarkerDetector::ThresholdMethods ARUCO_EYE_CONFIG_thresholdMethod=aruco::MarkerDetector::ADPT_THRES;
 const double ARUCO_EYE_CONFIG_ThresParam1=7;
 const double ARUCO_EYE_CONFIG_ThresParam2=7;
 const aruco::MarkerDetector::CornerRefinementMethod ARUCO_EYE_CONFIG_methodCornerRefinement=aruco::MarkerDetector::LINES;
-const int ARUCO_EYE_CONFIG_ThePyrDownLevel=0;
 const float ARUCO_EYE_CONFIG_minSize=0.045;//0.03;
 const float ARUCO_EYE_CONFIG_maxSize=0.5;//0.5;
 

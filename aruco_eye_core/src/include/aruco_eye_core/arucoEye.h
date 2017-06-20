@@ -203,7 +203,7 @@ public:
 
     //Configure ArucoDetector
 public:
-    int configureArucoDetector(bool enableErosion=false, aruco::MarkerDetector::ThresholdMethods thresholdMethod=aruco::MarkerDetector::ADPT_THRES, double ThresParam1=7, double ThresParam2=7, aruco::MarkerDetector::CornerRefinementMethod methodCornerRefinement=aruco::MarkerDetector::LINES, int ThePyrDownLevel=0, float minSize=0.03, float maxSize=0.5);
+    int configureArucoDetector(aruco::MarkerDetector::ThresholdMethods thresholdMethod=aruco::MarkerDetector::ADPT_THRES, double ThresParam1=7, double ThresParam2=7, aruco::MarkerDetector::CornerRefinementMethod methodCornerRefinement=aruco::MarkerDetector::LINES, float minSize=0.03, float maxSize=0.5);
 
     //run
 public:

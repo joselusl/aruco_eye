@@ -360,12 +360,8 @@ int ArucoEye::setArucoList(std::string arucoListFile)
 
 
 //Configure ArucoDetector
-int ArucoEye::configureArucoDetector(bool enableErosion, aruco::MarkerDetector::ThresholdMethods thresholdMethod, double ThresParam1, double ThresParam2, aruco::MarkerDetector::CornerRefinementMethod methodCornerRefinement, int ThePyrDownLevel, float minSize, float maxSize)
+int ArucoEye::configureArucoDetector(aruco::MarkerDetector::ThresholdMethods thresholdMethod, double ThresParam1, double ThresParam2, aruco::MarkerDetector::CornerRefinementMethod methodCornerRefinement, float minSize, float maxSize)
 {
-    //Marker detector
-    if(ThePyrDownLevel>0)
-        MDetector.pyrDown(ThePyrDownLevel);
-
 
     //Threshold
     //Params
@@ -381,10 +377,6 @@ int ArucoEye::configureArucoDetector(bool enableErosion, aruco::MarkerDetector::
     //Corner refinement method
     //enum CornerRefinementMethod {NONE,HARRIS,SUBPIX,LINES};
     MDetector.setCornerRefinementMethod(methodCornerRefinement);
-
-
-    //Erosion for chesstable
-    MDetector.enableErosion(enableErosion);
 
 
     //Specifies the min and max sizes of the markers as a fraction of the image size. By size we mean the maximum of cols and rows.
