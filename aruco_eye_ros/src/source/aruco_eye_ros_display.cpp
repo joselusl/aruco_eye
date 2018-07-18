@@ -165,7 +165,7 @@ int ArucoEyeDisplayROS::open()
     }
 
     // Subscriber aruco list
-    arucoListSub=new message_filters::Subscriber<aruco_eye_msgs::MarkerList>();
+    arucoListSub=new message_filters::Subscriber<perception_msgs::MarkerList>();
     arucoListSub->subscribe(nh, arucoListTopicName, 10);
 
     // messagesSyncronizer
@@ -207,7 +207,7 @@ void ArucoEyeDisplayROS::cameraInfoCallback(const sensor_msgs::CameraInfo &msg)
 
 
 
-void ArucoEyeDisplayROS::imageAndArucoListCallback(const sensor_msgs::ImageConstPtr& image, const aruco_eye_msgs::MarkerListConstPtr& arucoList)
+void ArucoEyeDisplayROS::imageAndArucoListCallback(const sensor_msgs::ImageConstPtr& image, const perception_msgs::MarkerListConstPtr& arucoList)
 {
     // Check time stamps
     if(image->header.stamp!=arucoList->header.stamp)
@@ -283,11 +283,11 @@ void ArucoEyeDisplayROS::imageAndArucoListCallback(const sensor_msgs::ImageConst
 
             geometry_msgs::Pose poseMsg=arucoList->markers[i].pose.pose;
 
-            tf::Pose tfPose;
-            tf::poseMsgToTF(poseMsg, tfPose);
+            tf2::Transform tfPose;
+            tf2::fromMsg(poseMsg, tfPose);
 
-            tf::Vector3 Tran=tfPose.getOrigin();
-            tf::Matrix3x3 Rot=tfPose.getBasis();
+            tf2::Vector3 Tran=tfPose.getOrigin();
+            tf2::Matrix3x3 Rot=tfPose.getBasis();
 
             cv::Mat cvTran(3, 1, CV_32FC1);
             cv::Mat cvRot(3, 3, CV_32FC1);
@@ -369,7 +369,7 @@ char ArucoEyeDisplayROS::displayArucoCodes(std::string windowName, int waitingTi
 }
 
 
-bool ArucoEyeDisplayROS::enableDisplayImageCallback(aruco_eye_srvs::SetBool::Request  &req, aruco_eye_srvs::SetBool::Response &res)
+bool ArucoEyeDisplayROS::enableDisplayImageCallback(robot_component_srvs::SetBool::Request  &req, robot_component_srvs::SetBool::Response &res)
 {
     this->flagDisplayOutputImage=req.data;
     res.success=true;

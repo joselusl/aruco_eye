@@ -41,13 +41,13 @@
 
 
 //ROS
-#include "ros/ros.h"
+#include <ros/ros.h>
 
 
 //Aruco Messages
-#include "aruco_eye_msgs/PointInImage.h"
-#include "aruco_eye_msgs/Marker.h"
-#include "aruco_eye_msgs/MarkerList.h"
+#include <perception_msgs/PointInImage.h>
+#include <perception_msgs/Marker.h>
+#include <perception_msgs/MarkerList.h>
 
 // Mesage filters
 #include <message_filters/subscriber.h>
@@ -64,13 +64,14 @@
 #include <sensor_msgs/CameraInfo.h>
 
 
-//// Tf
-#include <tf/transform_datatypes.h>
+//// Tf2
+#include <tf2/LinearMath/Transform.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 
 
 // Services
-#include "aruco_eye_srvs/SetBool.h"
+#include <robot_component_srvs/SetBool.h>
 
 
 //#define VERBOSE_ARUCO_EYE_ROS
@@ -126,15 +127,15 @@ protected:
     //Aruco Visual Markers detected
 protected:
     std::string arucoListTopicName;
-    message_filters::Subscriber<aruco_eye_msgs::MarkerList>* arucoListSub;
+    message_filters::Subscriber<perception_msgs::MarkerList>* arucoListSub;
     // Subscriber
-    aruco_eye_msgs::MarkerList arucoListMsg; //Messages
+    perception_msgs::MarkerList arucoListMsg; //Messages
 
     // Synchronization between topics
 protected:
-    typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, aruco_eye_msgs::MarkerList> TheSyncPolicy;
+    typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, perception_msgs::MarkerList> TheSyncPolicy;
     message_filters::Synchronizer<TheSyncPolicy>* messagesSyncronizer;
-    void imageAndArucoListCallback(const sensor_msgs::ImageConstPtr& image, const aruco_eye_msgs::MarkerListConstPtr& arucoList);
+    void imageAndArucoListCallback(const sensor_msgs::ImageConstPtr& image, const perception_msgs::MarkerListConstPtr& arucoList);
 
 
     // Output image
@@ -183,7 +184,7 @@ public:
 protected:
     std::string enableDisplayImageSrvName;
     ros::ServiceServer enableDisplayImageSrv;
-    bool enableDisplayImageCallback(aruco_eye_srvs::SetBool::Request  &req, aruco_eye_srvs::SetBool::Response &res);
+    bool enableDisplayImageCallback(robot_component_srvs::SetBool::Request  &req, robot_component_srvs::SetBool::Response &res);
 
 
 

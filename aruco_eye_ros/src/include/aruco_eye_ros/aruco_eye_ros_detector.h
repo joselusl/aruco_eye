@@ -41,13 +41,13 @@
 
 
 //ROS
-#include "ros/ros.h"
+#include <ros/ros.h>
 
 
 //Aruco Messages
-#include "aruco_eye_msgs/PointInImage.h"
-#include "aruco_eye_msgs/Marker.h"
-#include "aruco_eye_msgs/MarkerList.h"
+#include <perception_msgs/PointInImage.h>
+#include <perception_msgs/Marker.h>
+#include <perception_msgs/MarkerList.h>
 
 
 //ROS Images
@@ -61,9 +61,10 @@
 #include <sensor_msgs/CameraInfo.h>
 
 
-// Tf
-#include <tf/transform_datatypes.h>
-#include <tf/transform_broadcaster.h>
+// Tf2
+#include <tf2/LinearMath/Transform.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+#include <tf2_ros/transform_broadcaster.h>
 
 
 
@@ -139,14 +140,14 @@ protected:
     cv::Mat imageMat;
     //Subscriber
     image_transport::Subscriber imageSubs;
-    virtual void imageCallback(const sensor_msgs::ImageConstPtr& msg);
+    void imageCallback(const sensor_msgs::ImageConstPtr& msg);
 
 
     //Aruco Visual Markers detected
 protected:
     std::string arucoListTopicName;
     ros::Publisher arucoListPubl; ////Publishers
-    aruco_eye_msgs::MarkerList arucoListMsg; //Messages
+    perception_msgs::MarkerList arucoListMsg; //Messages
     bool publishArucoList();
 
 
@@ -179,9 +180,9 @@ protected:
 
     // Tf
 protected:
-    tf::TransformBroadcaster* tfTransformBroadcaster;
+    tf2_ros::TransformBroadcaster* tfTransformBroadcaster;
 protected:
-    tf::Transform arucoMarker2Tf(const aruco::Marker &marker);
+    geometry_msgs::Transform arucoMarker2Tf(const aruco::Marker &marker);
 
 };
 

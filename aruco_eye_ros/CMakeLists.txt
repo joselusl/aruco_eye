@@ -50,7 +50,7 @@ set(ARUCO_ROS_HEADER_FILES
 
 
 find_package(catkin REQUIRED
-                COMPONENTS roscpp message_filters image_transport cv_bridge geometry_msgs tf aruco_eye_msgs aruco_eye_srvs aruco_eye_core)
+                COMPONENTS roscpp message_filters image_transport cv_bridge geometry_msgs tf2 tf2_geometry_msgs tf2_ros perception_msgs robot_component_srvs aruco_eye_core)
 
 find_package(OpenCV REQUIRED)
 
@@ -59,7 +59,7 @@ catkin_package(
     DEPENDS OpenCV
     INCLUDE_DIRS ${ARUCO_ROS_INCLUDE_DIR}
     LIBRARIES ${PROJECT_NAME}
-    CATKIN_DEPENDS roscpp message_filters image_transport cv_bridge geometry_msgs tf aruco_eye_msgs aruco_eye_srvs aruco_eye_core
+    CATKIN_DEPENDS roscpp message_filters image_transport cv_bridge geometry_msgs tf2 tf2_geometry_msgs tf2_ros perception_msgs robot_component_srvs aruco_eye_core
   )
 
 

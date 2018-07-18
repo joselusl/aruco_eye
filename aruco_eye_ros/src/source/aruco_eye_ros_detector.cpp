@@ -25,7 +25,7 @@ ArucoEyeROS::ArucoEyeROS(int argc, char **argv)
     ros::NodeHandle nh;
 
     imageTransport=new image_transport::ImageTransport(nh);
-    tfTransformBroadcaster=new tf::TransformBroadcaster;
+    tfTransformBroadcaster=new tf2_ros::TransformBroadcaster();
 
     // Init
     init();
@@ -41,8 +41,10 @@ ArucoEyeROS::ArucoEyeROS(int argc, char **argv)
 ArucoEyeROS::~ArucoEyeROS()
 {
     // Delete
-    delete imageTransport;
-    delete tfTransformBroadcaster;
+    if(imageTransport)
+        delete imageTransport;
+    if(tfTransformBroadcaster)
+        delete tfTransformBroadcaster;
 
     // Close
     close();
@@ -188,7 +190,7 @@ int ArucoEyeROS::openROS()
     }
 
     // Publisher aruco 3D pose
-    arucoListPubl = nh.advertise<aruco_eye_msgs::MarkerList>(arucoListTopicName, 1, true);
+    arucoListPubl = nh.advertise<perception_msgs::MarkerList>(arucoListTopicName, 1, true);
 
     return 0;
 }
@@ -264,7 +266,7 @@ void ArucoEyeROS::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     // Iterate over the markers to fill the messages
     for(unsigned int i=0; i<TheMarkers.size(); i++)
     {
-        aruco_eye_msgs::Marker TheMarkerMsg;
+        perception_msgs::Marker TheMarkerMsg;
 
         // Detected
         aruco::Marker TheArucoMarker=TheMarkers[i].getMarker();
@@ -290,7 +292,7 @@ void ArucoEyeROS::imageCallback(const sensor_msgs::ImageConstPtr& msg)
             // Image points
             for(unsigned int i=0; i<TheArucoMarker.size(); i++)
             {
-                aruco_eye_msgs::PointInImage ThePointI;
+                perception_msgs::PointInImage ThePointI;
                 ThePointI.x=TheArucoMarker[i].x;
                 ThePointI.y=TheArucoMarker[i].y;
                 TheMarkerMsg.pointsInImage.push_back(ThePointI);
@@ -307,9 +309,17 @@ void ArucoEyeROS::imageCallback(const sensor_msgs::ImageConstPtr& msg)
         if(TheMarkers[i].is3DReconstructed())
         {
             // TF
-            tf::Transform transform = arucoMarker2Tf(TheArucoMarker);
-            tfTransformBroadcaster->sendTransform(tf::StampedTransform(transform, curr_stamp,
-                                                  parent_name, child_name));
+            geometry_msgs::TransformStamped transform_stamped;
+
+            // Header
+            transform_stamped.header.stamp=curr_stamp;
+            transform_stamped.header.frame_id=parent_name;
+            // Child frame id
+            transform_stamped.child_frame_id=child_name;
+            // Transform
+            transform_stamped.transform = arucoMarker2Tf(TheArucoMarker);
+            // Publish
+            tfTransformBroadcaster->sendTransform(transform_stamped);
 
             // Fill the message
             if(arucoListPubl.getNumSubscribers()>0)
@@ -318,12 +328,17 @@ void ArucoEyeROS::imageCallback(const sensor_msgs::ImageConstPtr& msg)
                 TheMarkerMsg.is3dReconstructed=true;
 
                 // Pose
-                geometry_msgs::Pose poseMsg;
-                tf::poseTFToMsg(transform, poseMsg);
-                TheMarkerMsg.pose.pose=poseMsg;
+                // Position
+                TheMarkerMsg.pose.pose.position.x=transform_stamped.transform.translation.x;
+                TheMarkerMsg.pose.pose.position.y=transform_stamped.transform.translation.y;
+                TheMarkerMsg.pose.pose.position.z=transform_stamped.transform.translation.z;
+                // orientation
+                TheMarkerMsg.pose.pose.orientation=transform_stamped.transform.rotation;
+
 
                 // Covariance
                 // TODO
+                // TheMarkerMsg.pose.covariance;
             }
 
         }
@@ -386,7 +401,7 @@ bool ArucoEyeROS::publishArucoList()
 }
 
 
-tf::Transform ArucoEyeROS::arucoMarker2Tf(const aruco::Marker &marker)
+geometry_msgs::Transform ArucoEyeROS::arucoMarker2Tf(const aruco::Marker &marker)
 {
     cv::Mat rot(3, 3, CV_32FC1);
     cv::Rodrigues(marker.Rvec, rot);
@@ -407,13 +422,20 @@ tf::Transform ArucoEyeROS::arucoMarker2Tf(const aruco::Marker &marker)
 //    rotate_to_ros.at<float>(2,2) = 0.0;
 //    rot = rot*rotate_to_ros.t();
 
-    tf::Matrix3x3 tf_rot(rot.at<float>(0,0), rot.at<float>(0,1), rot.at<float>(0,2),
+    tf2::Matrix3x3 tf_rot(rot.at<float>(0,0), rot.at<float>(0,1), rot.at<float>(0,2),
                        rot.at<float>(1,0), rot.at<float>(1,1), rot.at<float>(1,2),
                        rot.at<float>(2,0), rot.at<float>(2,1), rot.at<float>(2,2));
 
-    tf::Vector3 tf_orig(tran.at<float>(0,0), tran.at<float>(1,0), tran.at<float>(2,0));
+    tf2::Vector3 tf_orig(tran.at<float>(0,0), tran.at<float>(1,0), tran.at<float>(2,0));
 
-    return tf::Transform(tf_rot, tf_orig);
+
+
+    tf2::Transform tf2_transform=tf2::Transform(tf_rot, tf_orig);
+
+    geometry_msgs::Transform transform=tf2::toMsg(tf2_transform);
+
+
+    return transform;
 }
 
 

@@ -52,8 +52,6 @@ This repository is formed by a five ROS packages:
 
 + aruco_lib: original ArUco library (see [http://sourceforge.net/projects/aruco/](http://sourceforge.net/projects/aruco/) and [http://www.uco.es/investiga/grupos/ava/node/26](http://www.uco.es/investiga/grupos/ava/node/26) ) with catkin elements (CMakeLists.txt and package.xml)
 + aruco_eye_core: C++ (and ROS-independent) wrapper of the ArUco library with additional functionalities.
-+ aruco_eye_msgs: messages
-+ aruco_eye_srvs: services
 + aruco_eye_ros: ROS-dependent wrapper of the ArUco library with additional functionalities.
 
 
@@ -116,7 +114,9 @@ This metapackage depends on the following ROS packages:
 + image_transport: [http://wiki.ros.org/image_transport](http://wiki.ros.org/image_transport)
 + message_filters: [http://wiki.ros.org/message_filters](http://wiki.ros.org/message_filters)
 + cv_bridge: [http://wiki.ros.org/cv_bridge](http://wiki.ros.org/cv_bridge)
-+ tf: [http://wiki.ros.org/tf](http://wiki.ros.org/tf)
++ tf2: [http://wiki.ros.org/tf2](http://wiki.ros.org/tf2)
++ tf2_geometry_msgs: [http://wiki.ros.org/tf2_geometry_msgs](http://wiki.ros.org/tf2_geometry_msgs)
++ tf2_ros: [http://wiki.ros.org/tf2_ros](http://wiki.ros.org/tf2_ros)
 
 
 ### Extra ROS Dependencies
@@ -124,6 +124,8 @@ This metapackage depends on the following ROS packages:
 This metapackage depends on the following extra ROS packages:
 
 + pugixml: [https://github.com/joselusl/pugixml](https://github.com/joselusl/pugixml)
++ perception_msgs: [https://github.com/joselusl/perception_msgs](https://github.com/joselusl/perception_msgs)
++ robot_component_srvs: [https://github.com/joselusl/robot_component_srvs](https://github.com/joselusl/robot_component_srvs)
 
 
 
@@ -164,7 +166,7 @@ Subscribed topics:
 
 Published topics:
 
-+ aruco_eye/aruco_observation [aruco_eye_msgs/MarkerList]: The list of the detected visual markers with all its information.
++ aruco_eye/aruco_observation [perception_msgs/MarkerList]: The list of the detected visual markers with all its information.
 + tf [tf2_msgs/TFMessage]: The tf information of the detected and reconstructed visual markers.
 
 
@@ -201,7 +203,7 @@ Subscribed topics:
 
 + camera/image_raw [sensor_msgs/Image]: The images where the ArUco visual markers are going to be detected.
 + camera/camera_info [sensor_msgs/CameraInfo]: The calibration info of the camera.
-+ aruco_eye/aruco_observation [aruco_eye_msgs/MarkerList]: The list of the detected visual markers with all its information.
++ aruco_eye/aruco_observation [perception_msgs/MarkerList]: The list of the detected visual markers with all its information.
 
 Published topics:
 
@@ -226,7 +228,7 @@ Configurable ROS Parameters:
 
 Services served:
 
-+ aruco_eye/enable_display_output_image [aruco_eye_srvs/SetBool]: to enable or disable the display of the drawed markers using an OpenCV local window.
++ aruco_eye/enable_display_output_image [robot_component_srvs/SetBool]: to enable or disable the display of the drawed markers using an OpenCV local window.
 
 
 ### Additional Configurations
