@@ -261,17 +261,18 @@ void ArucoEyeDisplayROS::imageAndArucoListCallback(const sensor_msgs::ImageConst
         ArucoMarker TheArucoMarker;
 
         // Image points
-        for(unsigned int j=0; j<arucoList->markers[i].pointsInImage.size(); j++)
+        for(unsigned int j=0; j<arucoList->markers[i].labeledPointsInImage.size(); j++)
         {
-            cv::Point2f ThePointInImage(arucoList->markers[i].pointsInImage[j].x, arucoList->markers[i].pointsInImage[j].y);
+            cv::Point2f ThePointInImage(arucoList->markers[i].labeledPointsInImage[j].pointsInImage.x, arucoList->markers[i].labeledPointsInImage[j].pointsInImage.y);
             TheMarker.push_back(ThePointInImage);
         }
 
         // Id
-        TheMarker.id=arucoList->markers[i].id;
+        TheMarker.id=std::stoi(arucoList->markers[i].id);
 
         // Size
-        TheMarker.ssize=arucoList->markers[i].size;
+        if(!arucoList->markers[i].size.empty())
+            TheMarker.ssize=arucoList->markers[i].size[0];
 
         // 3D reconstruction
         if(arucoList->markers[i].is3dReconstructed)

@@ -284,18 +284,21 @@ void ArucoEyeROS::imageCallback(const sensor_msgs::ImageConstPtr& msg)
             TheMarkerMsg.header.frame_id=child_name;
 
             // Id
-            TheMarkerMsg.id=TheArucoMarker.id;
+            TheMarkerMsg.id=std::to_string(TheArucoMarker.id);
 
             // Size of the visual marker
-            TheMarkerMsg.size=TheArucoMarker.ssize;
+            TheMarkerMsg.size.resize(2);
+            TheMarkerMsg.size[0]=TheArucoMarker.ssize;
+            TheMarkerMsg.size[1]=TheArucoMarker.ssize;
 
             // Image points
             for(unsigned int i=0; i<TheArucoMarker.size(); i++)
             {
-                perception_msgs::PointInImage ThePointI;
-                ThePointI.x=TheArucoMarker[i].x;
-                ThePointI.y=TheArucoMarker[i].y;
-                TheMarkerMsg.pointsInImage.push_back(ThePointI);
+                perception_msgs::LabeledPointInImage labeled_point_i;
+                labeled_point_i.value="";
+                labeled_point_i.pointsInImage.x=TheArucoMarker[i].x;
+                labeled_point_i.pointsInImage.y=TheArucoMarker[i].y;
+                TheMarkerMsg.labeledPointsInImage.push_back(labeled_point_i);
             }
 
             // Flag 3D reconstruction initialization
