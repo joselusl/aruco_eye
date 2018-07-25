@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 
-set(PROJECT_NAME aruco_eye_core)
-project(${PROJECT_NAME})
+project(aruco_eye_core)
 
 
 # check c++11 / c++0x
