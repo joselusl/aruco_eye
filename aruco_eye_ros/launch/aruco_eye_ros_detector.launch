@@ -5,7 +5,7 @@
     <arg name="marker_size" default="0.16"/>
     <arg name="camera_name" default="camera" />
     <!-- <arg name="camera_calibration_file" default="$(find aruco_eye_ros)/config/camera.yml"/> -->
-    <arg name="camera_calibration_file" default="/home/claudio/.ros/camera_info/$(arg camera_name).yml"/>
+    <arg name="camera_calibration_file" default="$(env HOME)/.ros/camera_info/$(arg camera_name).yml"/>
     <arg name="camera_info_topic_name" default="$(arg camera_name)/camera_info"/>
 
     <arg name="aruco_detector_frame_name" default="aruco_detector"/>
