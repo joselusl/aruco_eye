@@ -91,11 +91,11 @@ void ArucoEyeROS::readParameters()
     // Config files
     //
     ros::param::param<std::string>("~aruco_dictionary", arucoDictionary, "ARUCO_MIP_36h12");
-    std::cout<<"aruco_dictionary"<<arucoDictionary<<std::endl;
+    std::cout<<"aruco_dictionary="<<arucoDictionary<<std::endl;
 
     std:string tmp_markerSize;
     ros::param::param<std::string>("~marker_size", tmp_markerSize, "0.16");
-    std::cout<<"marker_Size="<<tmp_markerSize<<std::endl;
+    std::cout<<"marker_size="<<tmp_markerSize<<std::endl;
     markerSize=stof(tmp_markerSize);
     //
     ros::param::param<std::string>("~camera_calibration_file", TheCameraCalibrationFile, "");
