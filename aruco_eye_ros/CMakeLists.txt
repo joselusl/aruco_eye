@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.5.1)
 
 project(aruco_eye_ros)
 
@@ -51,11 +51,11 @@ set(ARUCO_ROS_HEADER_FILES
 find_package(catkin REQUIRED
                 COMPONENTS roscpp message_filters image_transport cv_bridge geometry_msgs tf2 tf2_geometry_msgs tf2_ros perception_msgs robot_component_srvs aruco_eye_core)
 
-find_package(OpenCV REQUIRED)
-
+find_package(OpenCV 3.3 REQUIRED)
+find_package(aruco REQUIRED)
 
 catkin_package(
-    DEPENDS OpenCV
+    DEPENDS OpenCV aruco
     INCLUDE_DIRS ${ARUCO_ROS_INCLUDE_DIR}
     LIBRARIES ${PROJECT_NAME}
     CATKIN_DEPENDS roscpp message_filters image_transport cv_bridge geometry_msgs tf2 tf2_geometry_msgs tf2_ros perception_msgs robot_component_srvs aruco_eye_core
@@ -64,6 +64,7 @@ catkin_package(
 
 include_directories(${ARUCO_ROS_INCLUDE_DIR})
 include_directories(${OpenCV_INCLUDE_DIRS})
+include_directories(${aruco_INCLUDE_DIRS})
 include_directories(${catkin_INCLUDE_DIRS})
 
 
@@ -71,6 +72,7 @@ include_directories(${catkin_INCLUDE_DIRS})
 add_library(${PROJECT_NAME} ${ARUCO_ROS_SOURCE_FILES} ${ARUCO_ROS_HEADER_FILES})
 add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
+target_link_libraries(${PROJECT_NAME} ${aruco_LIBS})
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
 
@@ -78,6 +80,7 @@ add_executable(${PROJECT_NAME}_detector ${ARUCO_ROS_SOURCE_DIR}/aruco_eye_ros_de
 add_dependencies(${PROJECT_NAME}_detector ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME}_detector ${PROJECT_NAME})
 target_link_libraries(${PROJECT_NAME}_detector ${OpenCV_LIBS})
+target_link_libraries(${PROJECT_NAME}_detector ${aruco_LIBS})
 target_link_libraries(${PROJECT_NAME}_detector ${catkin_LIBRARIES})
 
 
@@ -85,4 +88,5 @@ add_executable(${PROJECT_NAME}_display ${ARUCO_ROS_SOURCE_DIR}/aruco_eye_ros_dis
 add_dependencies(${PROJECT_NAME}_display ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME}_display ${PROJECT_NAME})
 target_link_libraries(${PROJECT_NAME}_display ${OpenCV_LIBS})
+target_link_libraries(${PROJECT_NAME}_display ${aruco_LIBS})
 target_link_libraries(${PROJECT_NAME}_display ${catkin_LIBRARIES})

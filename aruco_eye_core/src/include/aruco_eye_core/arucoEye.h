@@ -5,7 +5,7 @@
 //      Author: joselusl
 //
 //  Last modification on:
-//      Author: joselusl
+//      Author: claudiocimarelli
 //
 //////////////////////////////////////////////////////
 
@@ -45,7 +45,7 @@
 #include <opencv2/opencv.hpp>
 
 //Aruco
-#include "aruco_lib/aruco.h"
+#include <aruco.h>
 
 //PUGIXML
 #include <pugixml/pugixml.hpp>
@@ -59,62 +59,6 @@
 #include <boost/filesystem.hpp>
 
 
-
-
-
-/////////////////////////////////////////
-// Class ArucoCodeDefinition
-//
-//   Description
-//
-/////////////////////////////////////////
-class ArucoCodeDefinition
-{
-protected:
-    int id; //aruco id
-    float size; //lado del aruco en metros
-    bool flagSizeSet;
-		
-public:
-    ArucoCodeDefinition();
-    ~ArucoCodeDefinition();
-
-public:
-    int setArucoCode(int idIn, float sizeIn);
-    int getId() const;
-    bool isSizeSet() const;
-    float getSize() const;
-  
-};
-
-
-
-/////////////////////////////////////////
-// Class ArucoListDefinition
-//
-//   Description
-//
-/////////////////////////////////////////
-class ArucoListDefinition
-{
-protected:
-    std::vector<ArucoCodeDefinition> ArucoListDefinitionCodes;
-
-
-public:
-    ArucoListDefinition();
-    ~ArucoListDefinition();
-
-    int loadListFromXmlFile(std::string filePath);
-
-    bool isCodeByIdInList(int idCode) const;
-    bool isCodeWithSizeInList(int idCode) const;
-
-    int getCodeSizeById(float &sizeCode, int idCode) const;
-
-    int getCodeSize(float &sizeCode, unsigned int codePosition) const;
-
-};
 
 
 /////////////////////////////////////////
@@ -139,10 +83,6 @@ protected:
 public:
     bool is3DReconstructed() const;
     int set3DReconstructed(bool flag3DReconstructed);
-
-
-
-
 };
 
 
@@ -173,13 +113,8 @@ public:
 protected:
     //Markers List
     std::vector<ArucoMarker> TheMarkers;
-
+    float TheMarkerSize;
     aruco::MarkerDetector MDetector;
-
-
-protected:
-    ArucoListDefinition ArucoList;
-
 
 public:
     ArucoEye();
@@ -190,20 +125,21 @@ public:
 
 public:
     //configure
-    int configure(std::string arucoListFile, std::string cameraParametersFile);
+    int configure(std::string & dictionary, std::string & cameraParametersFile);
 
-    //setting aruco list
+    //setting aruco dictionary and size
 public:
-    int setArucoList(std::string arucoListFile);
+    int setDictionary(std::string & dictionary);
+    int setMarkerSize(float sizeInMeters);
 
     //Setting the camera parameters
 public:
-    int setCameraParameters(std::string filename);
-    int setCameraParameters(aruco::CameraParameters camParam);
+    int setCameraParameters(std::string & filename);
+    int setCameraParameters(aruco::CameraParameters & camParam);
 
     //Configure ArucoDetector
-public:
-    int configureArucoDetector(aruco::MarkerDetector::ThresholdMethods thresholdMethod=aruco::MarkerDetector::ADPT_THRES, double ThresParam1=7, double ThresParam2=7, aruco::MarkerDetector::CornerRefinementMethod methodCornerRefinement=aruco::MarkerDetector::LINES, float minSize=0.03, float maxSize=0.5);
+//public:
+//    int configureArucoDetector(aruco::MarkerDetector::ThresholdMethods thresholdMethod=aruco::MarkerDetector::ADPT_THRES, double ThresParam1=7, double ThresParam2=7, aruco::MarkerDetector::CornerRefinementMethod methodCornerRefinement=aruco::MarkerDetector::LINES, float minSize=0.03, float maxSize=0.5);
 
     //run
 public:
@@ -226,7 +162,7 @@ public:
 
 public:
     int getMarkersList(std::vector<ArucoMarker> &TheMarkers) const;
-    int setMarkersList(const std::vector<ArucoMarker> TheMarkers);
+    int setMarkersList(std::vector<ArucoMarker> TheMarkers);
 
 public:
     int addMarkerToMarkersList(ArucoMarker TheMarkers);

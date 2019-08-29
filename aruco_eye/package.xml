@@ -12,7 +12,6 @@
 
   <buildtool_depend>catkin</buildtool_depend>
 
-  <exec_depend>aruco_lib</exec_depend>
   <exec_depend>aruco_eye_core</exec_depend>
   <exec_depend>aruco_eye_ros</exec_depend>
 

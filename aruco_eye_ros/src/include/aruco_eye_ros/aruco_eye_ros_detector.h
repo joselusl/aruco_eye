@@ -5,7 +5,7 @@
 //      Author: joselusl
 //
 //  Last modification on:
-//      Author: joselusl
+//      Author: claudiocimarelli
 //
 //////////////////////////////////////////////////////
 
@@ -35,9 +35,9 @@
 
 
 //aruco
-#include "aruco_lib/aruco.h"
+#include <aruco.h>
 //aruco_eye Lib
-#include "aruco_eye_core/arucoEye.h"
+#include <aruco_eye_core/arucoEye.h>
 
 
 //ROS
@@ -74,15 +74,12 @@
 
 // configurations
 // TODO
-const aruco::MarkerDetector::ThresholdMethods ARUCO_EYE_CONFIG_thresholdMethod=aruco::MarkerDetector::ADPT_THRES;
-const double ARUCO_EYE_CONFIG_ThresParam1=7;
-const double ARUCO_EYE_CONFIG_ThresParam2=7;
-const aruco::MarkerDetector::CornerRefinementMethod ARUCO_EYE_CONFIG_methodCornerRefinement=aruco::MarkerDetector::LINES;
-const float ARUCO_EYE_CONFIG_minSize=0.045;//0.03;
-const float ARUCO_EYE_CONFIG_maxSize=0.5;//0.5;
-
-
-
+//const aruco::MarkerDetector::ThresholdMethods ARUCO_EYE_CONFIG_thresholdMethod=aruco::MarkerDetector::ADPT_THRES;
+//const double ARUCO_EYE_CONFIG_ThresParam1=7;
+//const double ARUCO_EYE_CONFIG_ThresParam2=7;
+//const aruco::MarkerDetector::CornerRefinementMethod ARUCO_EYE_CONFIG_methodCornerRefinement=aruco::MarkerDetector::LINES;
+//const float ARUCO_EYE_CONFIG_minSize=0.045;//0.03;
+//const float ARUCO_EYE_CONFIG_maxSize=0.5;//0.5;
 
 /////////////////////////////////////////
 // Class ArucoEyeROS
@@ -94,11 +91,12 @@ class ArucoEyeROS
 {
     // Aruco List File
 protected:
-    std::string arucoListFile;
+    std::string arucoDictionary;
+    float markerSize;
 
 
 private:
-    int configureArucoEye(std::string arucoListFile, std::string cameraCalibrationFile);
+    int configureArucoEye(std::string & dictionary, float sizeInMeters, std::string & cameraCalibrationFile);
 
 
     //ArucoRetina
@@ -117,7 +115,7 @@ protected:
     // Camera Calibration
 protected:
     // Calibration using file
-    std::string cameraCalibrationFile;
+    std::string TheCameraCalibrationFile;
 
     // Calibration using topic
 protected:
@@ -125,7 +123,7 @@ protected:
     ros::Subscriber cameraInfoSub;
     void cameraInfoCallback(const sensor_msgs::CameraInfo &msg);
 protected:
-    aruco::CameraParameters rosCameraInfo2ArucoCamParams(const sensor_msgs::CameraInfo& cam_info,
+    static aruco::CameraParameters rosCameraInfo2ArucoCamParams(const sensor_msgs::CameraInfo& cam_info,
                                                                     bool useRectifiedParameters);
 
 
@@ -169,7 +167,7 @@ protected:
 
     //Open and Run
  public:
-    int open();
+    int setUp();
     int run();
 
     // Read parameters
@@ -182,7 +180,7 @@ protected:
 protected:
     tf2_ros::TransformBroadcaster* tfTransformBroadcaster;
 protected:
-    geometry_msgs::Transform arucoMarker2Tf(const aruco::Marker &marker);
+    static geometry_msgs::Transform arucoMarker2Tf(const aruco::Marker &marker);
 
 };
 

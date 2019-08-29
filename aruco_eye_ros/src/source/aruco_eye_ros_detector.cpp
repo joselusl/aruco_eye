@@ -5,7 +5,7 @@
 //      Author: joselusl
 //
 //  Last modification on:
-//      Author: joselusl
+//      Author: claudiocimarelli
 //
 //////////////////////////////////////////////////////
 
@@ -24,63 +24,42 @@ ArucoEyeROS::ArucoEyeROS(int argc, char **argv)
     ros::init(argc, argv, ros::this_node::getName());
     ros::NodeHandle nh;
 
+    markerSize=0.1;
+
     imageTransport=new image_transport::ImageTransport(nh);
     tfTransformBroadcaster=new tf2_ros::TransformBroadcaster();
 
     // Init
     init();
-
-    // Read parameters
-
-
-    // End
-    return;
+    setUp();
 }
 
 
 ArucoEyeROS::~ArucoEyeROS()
 {
     // Delete
-    if(imageTransport)
-        delete imageTransport;
-    if(tfTransformBroadcaster)
-        delete tfTransformBroadcaster;
-
+    delete imageTransport;
+    delete tfTransformBroadcaster;
     // Close
     close();
-
-    // End
-    return;
 }
 
 
 
-int ArucoEyeROS::configureArucoEye(std::string arucoListFile, std::string cameraCalibrationFile)
+int ArucoEyeROS::configureArucoEye(std::string & dictionary, float sizeInMeters, std::string & cameraCalibrationFile)
 {
     int error=0;
 
-    //configure aruco detector
-    if(MyArucoEye.configureArucoDetector(ARUCO_EYE_CONFIG_thresholdMethod,
-                                          ARUCO_EYE_CONFIG_ThresParam1,
-                                          ARUCO_EYE_CONFIG_ThresParam2,
-                                          ARUCO_EYE_CONFIG_methodCornerRefinement,
-                                          ARUCO_EYE_CONFIG_minSize,
-                                          ARUCO_EYE_CONFIG_maxSize) )
-    {
-#ifdef VERBOSE_ARUCO_EYE_ROS
-        cout<<"[AE-ROS] Error configuring Aruco Eye: configureArucoDetector"<<endl;
-#endif
-        error=1;
-    }
-
     //set aruco list
-    if(MyArucoEye.setArucoList(arucoListFile))
+    if(MyArucoEye.setDictionary(dictionary))
     {
 #ifdef VERBOSE_ARUCO_EYE_ROS
         cout<<"[AE-ROS] Error configuring Aruco Eye: setArucoList"<<endl;
 #endif
         error=2;
     }
+
+    MyArucoEye.setMarkerSize(sizeInMeters);
 
     //set camera parameters
     if(MyArucoEye.setCameraParameters(cameraCalibrationFile))
@@ -98,35 +77,30 @@ int ArucoEyeROS::configureArucoEye(std::string arucoListFile, std::string camera
 
 void ArucoEyeROS::init()
 {
-    if(MyArucoEye.init())
-        return;
-
-    return;
+    MyArucoEye.init();
 }
 
 
 void ArucoEyeROS::close()
 {
-    if(MyArucoEye.close())
-        return;
-
-    return;
+    MyArucoEye.close();
 }
 
 void ArucoEyeROS::readParameters()
 {
     // Config files
     //
-    ros::param::param<std::string>("~aruco_list_file", arucoListFile, "");
-    if(!arucoListFile.empty())
-        std::cout<<"aruco_list_file="<<arucoListFile<<std::endl;
-    //
-    ros::param::param<std::string>("~camera_calibration_file", cameraCalibrationFile, "");
-    if(!cameraCalibrationFile.empty())
-        std::cout<<"cameraCalibrationFile="<<cameraCalibrationFile<<std::endl;
+    ros::param::param<std::string>("~aruco_dictionary", arucoDictionary, "ARUCO_MIP_36h12");
+    std::cout<<"aruco_dictionary"<<arucoDictionary<<std::endl;
 
-    // TODO parameters of the aruco detector -> Now hardcoded!
+    std:string tmp_markerSize;
+    ros::param::param<std::string>("~marker_size", tmp_markerSize, "0.16");
+    std::cout<<"marker_Size="<<tmp_markerSize<<std::endl;
+    markerSize=stof(tmp_markerSize);
     //
+    ros::param::param<std::string>("~camera_calibration_file", TheCameraCalibrationFile, "");
+    if(!TheCameraCalibrationFile.empty())
+        std::cout << "TheCameraCalibrationFile=" << TheCameraCalibrationFile << std::endl;
 
     // Other parameters
     //
@@ -147,15 +121,12 @@ void ArucoEyeROS::readParameters()
     ros::param::param<std::string>("~aruco_list_topic_name", arucoListTopicName, "aruco_eye/aruco_observation");
     std::cout<<"aruco_list_topic_name="<<arucoListTopicName<<std::endl;
 
-
-
-    return;
 }
 
 int ArucoEyeROS::configure()
 {
     //configure droneArucoEye
-    int errorConfigureArucoEye=configureArucoEye(arucoListFile, cameraCalibrationFile);
+    int errorConfigureArucoEye=configureArucoEye(arucoDictionary, markerSize, TheCameraCalibrationFile);
     if(errorConfigureArucoEye > 0)
     {
 #ifdef VERBOSE_ARUCO_EYE_ROS
@@ -195,17 +166,14 @@ int ArucoEyeROS::openROS()
     return 0;
 }
 
-int ArucoEyeROS::open()
+int ArucoEyeROS::setUp()
 {
     // Read parameters
     readParameters();
-
     // Configure
     configure();
-
     // Open ROS
     openROS();
-
     //End
     return 0;
 }
@@ -264,12 +232,12 @@ void ArucoEyeROS::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     MyArucoEye.getMarkersList(TheMarkers);
 
     // Iterate over the markers to fill the messages
-    for(unsigned int i=0; i<TheMarkers.size(); i++)
+    for(auto & TheMarker : TheMarkers)
     {
         perception_msgs::Marker TheMarkerMsg;
 
         // Detected
-        aruco::Marker TheArucoMarker=TheMarkers[i].getMarker();
+        aruco::Marker TheArucoMarker=TheMarker.getMarker();
 
         // Header + frame names
         std::string child_name = aruco_marker_child_base_name+std::to_string(TheArucoMarker.id);
@@ -292,12 +260,12 @@ void ArucoEyeROS::imageCallback(const sensor_msgs::ImageConstPtr& msg)
             TheMarkerMsg.size[1]=TheArucoMarker.ssize;
 
             // Image points
-            for(unsigned int i=0; i<TheArucoMarker.size(); i++)
+            for(size_t j=0; j<TheArucoMarker.size(); j++)
             {
                 perception_msgs::LabeledPointInImage labeled_point_i;
                 labeled_point_i.value="";
-                labeled_point_i.pointsInImage.x=TheArucoMarker[i].x;
-                labeled_point_i.pointsInImage.y=TheArucoMarker[i].y;
+                labeled_point_i.pointsInImage.x=TheArucoMarker[j].x;
+                labeled_point_i.pointsInImage.y=TheArucoMarker[j].y;
                 TheMarkerMsg.labeledPointsInImage.push_back(labeled_point_i);
             }
 
@@ -309,7 +277,7 @@ void ArucoEyeROS::imageCallback(const sensor_msgs::ImageConstPtr& msg)
         }
 
         // Reconstructed
-        if(TheMarkers[i].is3DReconstructed())
+        if(TheMarker.is3DReconstructed())
         {
             // TF
             geometry_msgs::TransformStamped transform_stamped;
@@ -360,21 +328,18 @@ void ArucoEyeROS::imageCallback(const sensor_msgs::ImageConstPtr& msg)
         if(publishArucoList())
             return;
     }
-
-
-    return;
 }
 
 
 void ArucoEyeROS::cameraInfoCallback(const sensor_msgs::CameraInfo &msg)
 {
-    if(!MyArucoEye.setCameraParameters(rosCameraInfo2ArucoCamParams(msg, true)))
-    {
-        cameraInfoSub.shutdown();
-        std::cout<<"[AE-ROS] Camera calibration parameters received!"<<std::endl;
-    }
+//    aruco::CameraParameters camParam = rosCameraInfo2ArucoCamParams(msg, true);
+//    if(!MyArucoEye.setCameraParameters(camParam))
+//    {
+//        cameraInfoSub.shutdown();
+//        std::cout<<"[AE-ROS] Camera calibration parameters received!"<<std::endl;
+//    }
 
-    return;
 }
 
 int ArucoEyeROS::run()

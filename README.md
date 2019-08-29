@@ -48,9 +48,8 @@ You are using this software at your own risk. The authors decline any responsibi
 # Repository information
 
 ## Packages
-This repository is formed by a five ROS packages: 
-
-+ aruco_lib: original ArUco library (see [http://sourceforge.net/projects/aruco/](http://sourceforge.net/projects/aruco/) and [http://www.uco.es/investiga/grupos/ava/node/26](http://www.uco.es/investiga/grupos/ava/node/26) ) with catkin elements (CMakeLists.txt and package.xml)
+This repository is formed by a two ROS packages: 
+ 
 + aruco_eye_core: C++ (and ROS-independent) wrapper of the ArUco library with additional functionalities.
 + aruco_eye_ros: ROS-dependent wrapper of the ArUco library with additional functionalities.
 
@@ -81,13 +80,13 @@ This repository has the following branches:
 
 This package is running under:
 
-+ Ubuntu: 14.04 and above
-+ ROS: Indigo and above with Catkin
++ Ubuntu: 16.04 and above
++ ROS: Kinetic and built with Catkin
 
 This package has been tested under:
 
-+ Ubuntu: 14.04
-+ ROS: Indigo and Jade with Catkin
++ Ubuntu: 16.04
++ ROS: Kinetic and built with Catkin tool
 
 
 
@@ -97,8 +96,10 @@ This package has been tested under:
 
 This metapackage requires:
 
-+ OpenCV 2.0 and above
++ArUco library (see [http://sourceforge.net/projects/aruco/](http://sourceforge.net/projects/aruco/) and [http://www.uco.es/investiga/grupos/ava/node/26](http://www.uco.es/investiga/grupos/ava/node/26) ) 
++ OpenCV 3.3 and above
 + Boosts
+
 
 
 ### ROS Dependencies
@@ -270,7 +271,6 @@ Please, refer to  [http://www.uco.es/investiga/grupos/ava/node/26](http://www.uc
 
 
 
-
 # Contributors
 
 ## Authors / Maintainers / Past contributors
@@ -278,20 +278,7 @@ List of people that have contributed:
 
 + Jose Luis Sanchez-Lopez (jl.sanchez@upm.es): Main Author, Maintainaince, Debugging, Testing and Documentation.
 
-
-## Contact information
-Questions, suggestions, requests, ... whatever. Feel free to contact me (Jose Luis Sanchez-Lopez - jl.sanchez@upm.es).
-
-
 ## New contributors
-You are very welcome to contribute to this repository by opening a pull request via Github.
++ Claudio Cimarelli (claudio.cimarelli@uni.lu)
 	
-
-# Acknowledgments
-Special thanks to:
-
-+ Computer Vision Group (CVG): [www.vision4uav.eu](www.vision4uav.eu)
-+ Centre for Automation and Robotics (CAR): [http://www.car.upm-csic.es/](http://www.car.upm-csic.es/)
-+ Consejo Superior de Investigaciones Cientificas (CSIC): [http://www.csic.es](http://www.csic.es)
-+ Universidad Politecnica de Madrid (UPM): [http://www.upm.es](http://www.upm.es)
 
