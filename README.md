@@ -1,6 +1,9 @@
 # aruco_eye
 This is the repository of the aruco_eye metapackage. It is a ROS wrapper of the ArUco library (ArUco: a minimal library for Augmented Reality applications based on OpenCV [http://www.uco.es/investiga/grupos/ava/node/26](http://www.uco.es/investiga/grupos/ava/node/26)), adding extra functionalities very useful for Robotics.
 
+# Changelog
++ added compatibility with aruco dictionaries an custom dictionaries
++ removed unnecessary dependencies
 
 # Table of contents
 + [Disclaimer](#disclaimer)
@@ -81,12 +84,12 @@ This repository has the following branches:
 This package is running under:
 
 + Ubuntu: 16.04 and above
-+ ROS: Kinetic and built with Catkin
++ ROS: Kinetic and built with  catkin tools
 
 This package has been tested under:
 
 + Ubuntu: 16.04
-+ ROS: Kinetic and built with Catkin tool
++ ROS: Kinetic and built with catkin tools
 
 
 
@@ -96,7 +99,7 @@ This package has been tested under:
 
 This metapackage requires:
 
-+ArUco library (see [http://sourceforge.net/projects/aruco/](http://sourceforge.net/projects/aruco/) and [http://www.uco.es/investiga/grupos/ava/node/26](http://www.uco.es/investiga/grupos/ava/node/26) ) 
++ ArUco library (see [http://sourceforge.net/projects/aruco/](http://sourceforge.net/projects/aruco/) and [http://www.uco.es/investiga/grupos/ava/node/26](http://www.uco.es/investiga/grupos/ava/node/26) ) 
 + OpenCV 3.3 and above
 + Boosts
 
@@ -124,14 +127,10 @@ This metapackage depends on the following ROS packages:
 
 This metapackage depends on the following extra ROS packages:
 
-+ pugixml: [https://github.com/joselusl/pugixml](https://github.com/joselusl/pugixml)
 + perception_msgs: [https://github.com/joselusl/perception_msgs](https://github.com/joselusl/perception_msgs)
 + robot_component_srvs: [https://github.com/joselusl/robot_component_srvs](https://github.com/joselusl/robot_component_srvs)
 
-
-
 # Installation Instructions
-
 
 ## Pre-requirements
 Install all the system and ROS dependencies (for example, using rosdep install, or apt-get, or directly from source).
@@ -150,7 +149,8 @@ Install all the system and ROS dependencies (for example, using rosdep install, 
 # Running Instructions
 
 The package aruco_eye_ros included in this repository generates two ROS nodes that can be executed:
-
++ [aruco_eye_ros_detector](#aruco_eye_ros_detector)
++ [aruco_eye_ros_display](#aruco_eye_ros_display)
 
 ## aruco_eye_ros_detector
 This node processes the given images searching for ArUco visual markers, publishing them in a ROS topic.
@@ -158,40 +158,29 @@ This node processes the given images searching for ArUco visual markers, publish
 ### ROS Launcher
 The package aruco_eye_ros includes a launcher called aruco_eye_ros_detector.launch.
 
+Configurable ROS launch parameters:
+
++ camera_name[type=string, default="camera"]: name of the camera
++ aruco_dictionary[type=string, default="ARUCO_MIP_36h12"]: name of the aruco dictionary or the path to a custom dictionary
++ marker_size[type=string, default="0.16"]: size of the marker in meters
++ camera_calibration_file [type=string, default="${env HOME}/.ros/camera_info/$(arg camera_name).yml"]: the path to the camera calibration file. If nothing is used here, it uses the information given by the camera/camera_info topic.
++ aruco_detector_frame_name [type=string, default=aruco_detector]: the name of the aruco detector frame.
++ aruco_marker_child_base_name [type=string, default=aruco_marker_]: the base name for the visual markers frame.
++ image_topic_name [type=string, default=${arg camera_name}/image_raw]: the topic name of the images.
++ camera_info_topic_name [type=string, default=${arg camera_name}/camera_info]: the topic name of the camera calibration.
++ aruco_list_topic_name [type=string, default=aruco_eye/aruco_observation]: the topic name for the list of detected visual markers.
+
 ### ROS Topics
 Subscribed topics:
 
-+ camera/image_raw [sensor_msgs/Image]: The images where the ArUco visual markers are going to be detected.
-+ camera/camera_info [sensor_msgs/CameraInfo]: The calibration info of the camera.
++ ${arg image_topic_name} [sensor_msgs/Image]: The images where the ArUco visual markers are going to be detected.
++ ${arg camera_info_topic_name} [sensor_msgs/CameraInfo]: The calibration info of the camera.
 
 
 Published topics:
 
-+ aruco_eye/aruco_observation [perception_msgs/MarkerList]: The list of the detected visual markers with all its information.
++ ${arg aruco_list_topic_name} [perception_msgs/MarkerList]: The list of the detected visual markers with all its information.
 + tf [tf2_msgs/TFMessage]: The tf information of the detected and reconstructed visual markers.
-
-
-### ROS Parameters
-Configurable ROS parameters:
-
-+ aruco_list_file [type=string, default=$(find aruco_eye_ros)/config/arUcoList.xml]: the path to the ArUco list configuration file. See below for more information.
-+ camera_calibration_file [type=string, default=]: the path to the camera calibration file. If nothing is used here, it uses the information given by the camera/camera_info topic.
-+ aruco_detector_frame_name [type=string, default=aruco_detector]: the name of the aruco detector frame.
-+ aruco_marker_child_base_name [type=string, default=aruco_marker_]: the base name for the visual markers frame.
-+ image_topic_name [type=string, default=camera/image_raw]: the topic name of the images.
-+ camera_info_topic_name [type=string, default=camera/camera_info]: the topic name of the camera calibration.
-+ aruco_list_topic_name [type=string, default=aruco_eye/aruco_observation]: the topic name for the list of detected visual markers.
-
-### ROS Services
-None.
-
-### Additional Configurations in files
-There are two configuration files. An example can be find in  aruco_eye_ros/config:
-
-+ camera.yml: camera configuration file in YAML format. File type generated by OpenCV. For more information, please refer to: [http://www.uco.es/investiga/grupos/ava/node/26](http://www.uco.es/investiga/grupos/ava/node/26)
-
-+ arUcoList.xml: ArUco list configuration file in XML format. It has the information of the ArUco visual markers that want to be detected. Please open the example file in aruco_eye_core/config/arUcoList.xml for basic information. Please, be sure that the format is correct, otherwise the node will not work.
-
 
 ## aruco_eye_ros_display
 This node allows the visualization of the detected ArUco visual markers by the node aruco_eye_ros_detector.
@@ -199,30 +188,28 @@ This node allows the visualization of the detected ArUco visual markers by the n
 ### ROS Launcher
 The package aruco_eye_ros includes a launcher called aruco_eye_ros_display.launch.
 
-### ROS Topics
-Subscribed topics:
-
-+ camera/image_raw [sensor_msgs/Image]: The images where the ArUco visual markers are going to be detected.
-+ camera/camera_info [sensor_msgs/CameraInfo]: The calibration info of the camera.
-+ aruco_eye/aruco_observation [perception_msgs/MarkerList]: The list of the detected visual markers with all its information.
-
-Published topics:
-
-+ aruco_eye/aruco_observation_image/image_raw [sensor_msgs/Image]: The image with the drawed ArUco Visual Markers.
-
-
-### ROS Parameters
-
-Configurable ROS Parameters:
+Configurable ROS launch Parameters:
 
 + display_output_image_window_name [type=string, default=arUco_display_window]: the name of the OpenCV local window to display the visual markers.
 + flag_display_output_image [type=boolean, default=True]: flag to enable or disable the display of the drawed markers using an OpenCV local window
 + display_output_image_service_name [type=string, default=aruco_eye/enable_display_output_image]: service name to enable or disable the display of the drawed markers using an OpenCV local window.
-+ camera_calibration_file [type=string, default=]: See above.
-+ camera_info_topic_name [type=string, default=camera/camera_info]: See above.
-+ image_topic_name [type=string, default=camera/image_raw]: See above.
++ camera_calibration_file [type=string, default="${env HOME}/.ros/camera_info/$(arg camera_name).yml"]: the path to the camera calibration file. If nothing is used here, it uses the information given by the camera/camera_info topic.
++ image_topic_name [type=string, default=${arg camera_name}/image_raw]: the topic name of the images.
++ camera_info_topic_name [type=string, default=${arg camera_name}/camera_info]: the topic name of the camera calibration.
 + aruco_list_topic_name [type=string, default=aruco_eye/aruco_observation]: See above.
 + output_image_topic_name [type=string, default=aruco_eye/aruco_observation_image/image_raw]: topic name of the image with the drawed ArUco Visual Markers.
+
+
+### ROS Topics
+Subscribed topics:
+
++ ${arg image_topic_name} [sensor_msgs/Image]: The images where the ArUco visual markers are going to be detected.
++ ${arg camera_info_topic_name} [sensor_msgs/CameraInfo]: The calibration info of the camera.
++ ${arg aruco_list_topic_name} [perception_msgs/MarkerList]: The list of the detected visual markers with all its information.
+
+Published topics:
+
++ aruco_eye/aruco_observation_image/image_raw [sensor_msgs/Image]: The image with the drawed ArUco Visual Markers.
 
 
 ### ROS Services

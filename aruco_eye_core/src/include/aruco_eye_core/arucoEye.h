@@ -47,10 +47,6 @@
 //Aruco
 #include <aruco.h>
 
-//PUGIXML
-#include <pugixml/pugixml.hpp>
-
-
 
 //#define VERBOSE_ARUCO_EYE
 
