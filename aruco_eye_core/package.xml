@@ -12,8 +12,7 @@
 
 	<buildtool_depend>catkin</buildtool_depend>
 
-  <depend>pugixml</depend>
-  <depend>aruco_lib</depend>
+    <depend>aruco_lib</depend>
 
   
 </package>

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.5.1)
 
 project(aruco_eye_core)
 
@@ -47,10 +47,11 @@ set(ARUCO_EYE_CORE_HEADER_FILES
 
 
 
-find_package(catkin REQUIRED
-		COMPONENTS pugixml aruco_lib)
+find_package(catkin REQUIRED)
 
-find_package(OpenCV REQUIRED)
+find_package(OpenCV 3 REQUIRED)
+
+find_package(aruco REQUIRED)
 
 find_package(Boost REQUIRED COMPONENTS filesystem)
 
@@ -58,13 +59,13 @@ find_package(Boost REQUIRED COMPONENTS filesystem)
 catkin_package(
         INCLUDE_DIRS ${ARUCO_EYE_CORE_INCLUDE_DIR}
         LIBRARIES ${PROJECT_NAME}
-        DEPENDS OpenCV Boost
-        CATKIN_DEPENDS pugixml aruco_lib
-  )
+        DEPENDS OpenCV Boost aruco
+)
 
 
 include_directories(${ARUCO_EYE_CORE_INCLUDE_DIR})
 include_directories(${OpenCV_INCLUDE_DIRS})
+include_directories(${aruco_INCLUDE_DIRS})
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${catkin_INCLUDE_DIRS})
 
@@ -73,5 +74,6 @@ include_directories(${catkin_INCLUDE_DIRS})
 add_library(${PROJECT_NAME} ${ARUCO_EYE_CORE_SOURCE_FILES} ${ARUCO_EYE_CORE_HEADER_FILES})
 add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
+target_link_libraries(${PROJECT_NAME} ${aruco_LIBS})
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})

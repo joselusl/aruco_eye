@@ -5,7 +5,7 @@
 //      Author: joselusl
 //
 //  Last modification on:
-//      Author: joselusl
+//      Author: claudiocimarelli
 //
 //////////////////////////////////////////////////////
 
@@ -24,9 +24,8 @@ ArucoEyeDisplayROS::ArucoEyeDisplayROS(int argc, char **argv)
     ros::init(argc, argv, ros::this_node::getName());
     // Node handle
     ros::NodeHandle nh;
-
     init();
-    return;
+    open();
 }
 
 
@@ -43,7 +42,6 @@ ArucoEyeDisplayROS::~ArucoEyeDisplayROS()
 
     // CLose
     close();
-    return;
 }
 
 
@@ -68,8 +66,9 @@ int ArucoEyeDisplayROS::configureArucoEye(std::string cameraCalibrationFile)
 
 void ArucoEyeDisplayROS::init()
 {
+    // Read parameters
+    readParameters();
 
-    return;
 }
 
 
@@ -78,7 +77,6 @@ void ArucoEyeDisplayROS::close()
     if(!MyArucoEye.close())
         return;
 
-    return;
 }
 
 void ArucoEyeDisplayROS::readParameters()
@@ -87,7 +85,7 @@ void ArucoEyeDisplayROS::readParameters()
     //
     ros::param::param<std::string>("~camera_calibration_file", cameraCalibrationFile, "");
     if(!cameraCalibrationFile.empty())
-        std::cout<<"cameraCalibrationFile="<<cameraCalibrationFile<<std::endl;
+        std::cout<<"TheCameraCalibrationFile="<<cameraCalibrationFile<<std::endl;
 
     // Other parameters
     // Display image
@@ -117,20 +115,12 @@ void ArucoEyeDisplayROS::readParameters()
     ros::param::param<std::string>("~display_output_image_service_name", enableDisplayImageSrvName, "aruco_eye/enable_display_output_image");
     std::cout<<"display_output_image_service_name="<<enableDisplayImageSrvName<<std::endl;
 
-
-    // End
-    return;
 }
 
 int ArucoEyeDisplayROS::open()
 {
     // Node handle
     ros::NodeHandle nh;
-
-    // Read parameters
-    readParameters();
-
-
     // Configure
     //configure droneArucoEye
     int errorConfigureArucoEye=configureArucoEye(cameraCalibrationFile);
@@ -196,13 +186,13 @@ int ArucoEyeDisplayROS::open()
 
 void ArucoEyeDisplayROS::cameraInfoCallback(const sensor_msgs::CameraInfo &msg)
 {
-    if(!MyArucoEye.setCameraParameters(rosCameraInfo2ArucoCamParams(msg, true)))
-    {
-        cameraInfoSub.shutdown();
-        std::cout<<"[AE_ROS] Camera calibration parameters received!"<<std::endl;
-    }
+//    aruco::CameraParameters camParam = rosCameraInfo2ArucoCamParams(msg, true);
+//    if(!MyArucoEye.setCameraParameters(camParam))
+//    {
+//        cameraInfoSub.shutdown();
+//        std::cout<<"[AE_ROS] Camera calibration parameters received!"<<std::endl;
+//    }
 
-    return;
 }
 
 
@@ -254,35 +244,35 @@ void ArucoEyeDisplayROS::imageAndArucoListCallback(const sensor_msgs::ImageConst
 
     // Read visual markers information
     MyArucoEye.clearMarkersList();
-    for(unsigned int i=0; i<arucoList->markers.size(); i++)
+    for(const auto & marker : arucoList->markers)
     {
         // Aux variables
         aruco::Marker TheMarker;
         ArucoMarker TheArucoMarker;
 
         // Image points
-        for(unsigned int j=0; j<arucoList->markers[i].labeledPointsInImage.size(); j++)
+        for(const auto & j : marker.labeledPointsInImage)
         {
-            cv::Point2f ThePointInImage(arucoList->markers[i].labeledPointsInImage[j].pointsInImage.x, arucoList->markers[i].labeledPointsInImage[j].pointsInImage.y);
+            cv::Point2f ThePointInImage(j.pointsInImage.x, j.pointsInImage.y);
             TheMarker.push_back(ThePointInImage);
         }
 
         // Id
-        TheMarker.id=std::stoi(arucoList->markers[i].id);
+        TheMarker.id=std::stoi(marker.id);
 
         // Size
-        if(!arucoList->markers[i].size.empty())
-            TheMarker.ssize=arucoList->markers[i].size[0];
+        if(!marker.size.empty())
+            TheMarker.ssize=marker.size[0];
 
         // 3D reconstruction
-        if(arucoList->markers[i].is3dReconstructed)
+        if(marker.is3dReconstructed)
         {
             TheArucoMarker.set3DReconstructed(true);
 
             //geometry_msgs::Point position=arucoList->markers[i].pose.pose.position;
             //geometry_msgs::Quaternion orientation=arucoList->markers[i].pose.pose.orientation;
 
-            geometry_msgs::Pose poseMsg=arucoList->markers[i].pose.pose;
+            geometry_msgs::Pose poseMsg=marker.pose.pose;
 
             tf2::Transform tfPose;
             tf2::fromMsg(poseMsg, tfPose);
@@ -333,13 +323,10 @@ void ArucoEyeDisplayROS::imageAndArucoListCallback(const sensor_msgs::ImageConst
         }
     }
 
-
     // Display
     if(flagDisplayOutputImage)
         displayArucoCodes(arucoEyeWindow,1);
 
-
-    return;
 }
 
 

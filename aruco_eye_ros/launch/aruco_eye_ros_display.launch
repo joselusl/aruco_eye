@@ -1,26 +1,23 @@
 <!-- Launcher: aruco_eye_ros_display -->
 <launch>
-	
-	<arg name="aruco_eye_ros_display_node_name" 	default="aruco_eye_ros_display_node" />
-
   <arg name="flag_display_output_image" default="True"/>
   <arg name="display_output_image_window_name" default="arUco_display_window"/>
-
   <arg name="display_output_image_service_name" default="aruco_eye/enable_display_output_image"/>
 
-  <!-- <arg name="camera_calibration_file" default="$(find aruco_eye_ros)/config/camera.yml"/> -->
-  <arg name="camera_calibration_file" default=""/>
-  <arg name="camera_info_topic_name" default="camera/camera_info"/>
 
-  <arg name="image_topic_name" 	default="camera/image_raw" />
+  <arg name="camera_name" default="camera" />
+  <arg name="camera_calibration_file" default="$(env HOME)/.ros/camera_info/$(arg camera_name).yml"/>
+  <arg name="camera_info_topic_name" default="$(arg camera_name)/camera_info"/>
+
+  <arg name="image_topic_name" 	default="$(arg camera_name)/image_raw" />
   <arg name="output_image_topic_name" 	default="aruco_eye/aruco_observation_image/image_raw" />
   <arg name="aruco_list_topic_name" 	default="aruco_eye/aruco_observation" />
 
 
-	<node name="$(arg aruco_eye_ros_display_node_name)" pkg="aruco_eye_ros" type="aruco_eye_ros_display" output="screen">
+  <node name="$(anon aruco_eye_display_node)" pkg="aruco_eye_ros" type="aruco_eye_ros_display" output="screen">
 
     <param name="display_output_image_window_name" value="$(arg display_output_image_window_name)" type="string"/>    
-    <param name="flag_display_output_image" value="$(arg flag_display_output_image)" type="Boolean"/>
+    <param name="flag_display_output_image" value="$(arg flag_display_output_image)" type="bool"/>
 
     <param name="display_output_image_service_name" value="$(arg display_output_image_service_name)" type="string"/>  
 
@@ -31,6 +28,6 @@
     <param name="output_image_topic_name" value="$(arg output_image_topic_name)" type="string"/>
     <param name="aruco_list_topic_name" value="$(arg aruco_list_topic_name)" type="string"/>
 
-	</node>
+  </node>
 
 </launch>

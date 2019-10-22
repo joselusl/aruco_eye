@@ -5,7 +5,7 @@
 //      Author: joselusl
 //
 //  Last modification on:
-//      Author: joselusl
+//      Author: claudiocimarelli
 //
 //////////////////////////////////////////////////////
 
@@ -35,7 +35,7 @@
 
 
 //aruco
-#include "aruco_lib/aruco.h"
+#include <aruco.h>
 //aruco_eye Lib
 #include "aruco_eye_core/arucoEye.h"
 
@@ -76,11 +76,6 @@
 
 //#define VERBOSE_ARUCO_EYE_ROS
 
-
-
-
-
-
 /////////////////////////////////////////
 // Class ArucoEyeROS
 //
@@ -92,32 +87,22 @@ class ArucoEyeDisplayROS
     // Configure
 private:
     int configureArucoEye(std::string cameraCalibrationFile);
+    static aruco::CameraParameters rosCameraInfo2ArucoCamParams(const sensor_msgs::CameraInfo& cam_info,
+                                                         bool useRectifiedParameters);
 
     //ArucoRetina
 protected:
     ArucoEye MyArucoEye;
-
-
     // Camera Calibration
-protected:
     // Calibration using file
     std::string cameraCalibrationFile;
-
-    // Calibration using topic
-protected:
     std::string camera_info_topic_name;
     ros::Subscriber cameraInfoSub;
     void cameraInfoCallback(const sensor_msgs::CameraInfo &msg);
-protected:
-    aruco::CameraParameters rosCameraInfo2ArucoCamParams(const sensor_msgs::CameraInfo& cam_info,
-                                                                    bool useRectifiedParameters);
 
     // Images
-protected:
     image_transport::ImageTransport* imageTransport;
-
     //Images received
-protected:
     std::string imageTopicName;
     cv_bridge::CvImagePtr cvImage;
     cv::Mat imageMat;
@@ -125,27 +110,24 @@ protected:
     message_filters::Subscriber<sensor_msgs::Image>* imageSubs;
 
     //Aruco Visual Markers detected
-protected:
+
     std::string arucoListTopicName;
     message_filters::Subscriber<perception_msgs::MarkerList>* arucoListSub;
     // Subscriber
     perception_msgs::MarkerList arucoListMsg; //Messages
 
     // Synchronization between topics
-protected:
+
     typedef message_filters::sync_policies::ExactTime<sensor_msgs::Image, perception_msgs::MarkerList> TheSyncPolicy;
     message_filters::Synchronizer<TheSyncPolicy>* messagesSyncronizer;
     void imageAndArucoListCallback(const sensor_msgs::ImageConstPtr& image, const perception_msgs::MarkerListConstPtr& arucoList);
 
 
     // Output image
-protected:
     std::string outputImageTopicName;
     cv::Mat outputImageMat;
     // Publisher
     image_transport::Publisher outputImagePub;
-
-
 
     //Constructors and destructors
 public:
@@ -153,20 +135,18 @@ public:
     ~ArucoEyeDisplayROS();
 
     //Init and close
-public:
+protected:
     void init();
     void close();
 
-    //Open
- public:
     int open();
 
+    //Open
+ public:
     int run();
 
 protected:
     void readParameters();
-
-
 
     // Drawing Aruco visual markers
 public:

@@ -5,7 +5,7 @@
 //      Author: joselusl
 //
 //  Last modification on:
-//      Author: joselusl
+//      Author: claudiocimarelli
 //
 //////////////////////////////////////////////////////
 
@@ -25,8 +25,6 @@ int main(int argc,char **argv)
 {
     ArucoEyeROS MyArucoEyeROS(argc, argv);
     std::cout<<"[ROSNODE] Starting "<<ros::this_node::getName()<<std::endl;
-  	
-    MyArucoEyeROS.open();
 
     MyArucoEyeROS.run();
 

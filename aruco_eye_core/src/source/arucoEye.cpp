@@ -5,7 +5,7 @@
 //      Author: joselusl
 //
 //  Last modification on:
-//      Author: joselusl
+//      Author: claudiocimarelli
 //
 //////////////////////////////////////////////////////
 
@@ -17,213 +17,12 @@
 using namespace std;
 
 
-
-
-/////////////////// ArucoCodeDefinition ////////////////
-ArucoCodeDefinition::ArucoCodeDefinition()
-{
-    id=-1;
-    size=-1;
-    flagSizeSet=false;
-    //type=-1;
-
-    return;
-}
-
-ArucoCodeDefinition::~ArucoCodeDefinition()
-{
-
-    return;
-}
-
-
-int ArucoCodeDefinition::setArucoCode(int idIn, float sizeIn)
-{
-    id=idIn;
-    if(sizeIn<=0)
-    {
-        size=-1.0;
-        flagSizeSet=false;
-    }
-    else
-    {
-        size=sizeIn;
-        flagSizeSet=true;
-    }
-    return 0;
-}
-
-int ArucoCodeDefinition::getId() const
-{
-    return id;
-}
-
-bool ArucoCodeDefinition::isSizeSet() const
-{
-    return flagSizeSet;
-}
-
-float ArucoCodeDefinition::getSize() const
-{
-    return size;
-}
-
-
-
-
-/////////////// ArucoListDefinition ///////////////////
-
-ArucoListDefinition::ArucoListDefinition()
-{
-    return;
-}
-
-
-ArucoListDefinition::~ArucoListDefinition()
-{
-    ArucoListDefinitionCodes.clear();
-
-    return;
-}
-
-int ArucoListDefinition::loadListFromXmlFile(std::string filePath)
-{
-    int error=0;
-
-    //XML document
-    pugi::xml_document doc;
-    std::ifstream nameFile(filePath.c_str());
-    pugi::xml_parse_result result = doc.load(nameFile);
-
-    if(!result)
-    {
-        cout<<"I cannot open xml file: "<<filePath<<endl;
-        return 1;
-    }
-
-
-    ///Aruco lists
-    pugi::xml_node aruco = doc.child("arucoList");
-
-
-    std::string readingValue;
-    int id;
-    double size;
-
-    ArucoCodeDefinition ArucoAux;
-
-    for(pugi::xml_node arucoMarker = aruco.child("arucoMarker");arucoMarker; arucoMarker = arucoMarker.next_sibling("arucoMarker"))
-    {
-        readingValue=arucoMarker.child_value("id");
-        istringstream convertid(readingValue);
-        convertid>>id;
-
-        readingValue=arucoMarker.child_value("size");
-        if(readingValue=="")
-            size=-1.0;
-        else
-        {
-            istringstream convertsize(readingValue);
-            convertsize>>size;
-        }
-
-        ArucoAux.setArucoCode(id,size);
-
-        //Añadimos. TODO check that already doesnt exist
-        if(!isCodeByIdInList(id))
-        {
-            ArucoListDefinitionCodes.push_back(ArucoAux);
-        }
-        else
-        {
-            error=2;
-        }
-    }
-
-    return error;
-}
-
-
-
-bool ArucoListDefinition::isCodeByIdInList(int idCode) const
-{
-    for(unsigned int i=0;i<ArucoListDefinitionCodes.size();i++)
-    {
-        if(ArucoListDefinitionCodes[i].getId()==idCode)
-            return true;
-    }
-
-    return false;
-}
-
-bool ArucoListDefinition::isCodeWithSizeInList(int idCode) const
-{
-    for(unsigned int i=0;i<ArucoListDefinitionCodes.size();i++)
-    {
-        if(ArucoListDefinitionCodes[i].getId()==idCode)
-        {
-            if(ArucoListDefinitionCodes[i].isSizeSet())
-                return true;
-            else
-                return false;
-        }
-
-    }
-
-    return false;
-
-}
-
-
-int ArucoListDefinition::getCodeSizeById(float &sizeCode, int idCode) const
-{
-    sizeCode=-1.0;
-
-    for(unsigned int i=0;i<ArucoListDefinitionCodes.size();i++)
-    {
-        if(ArucoListDefinitionCodes[i].getId()==idCode)
-        {
-            if(ArucoListDefinitionCodes[i].isSizeSet())
-            {
-                sizeCode=ArucoListDefinitionCodes[i].getSize();
-                return 0;
-            }
-            else
-            {
-                sizeCode=-1.0;
-                return 1;
-            }
-        }
-    }
-    return 2;
-}
-
-int ArucoListDefinition::getCodeSize(float &sizeCode, unsigned int codePosition) const
-{
-    if(codePosition<ArucoListDefinitionCodes.size())
-    {
-        sizeCode=ArucoListDefinitionCodes[codePosition].getSize();
-        return 0;
-    }
-    else
-    {
-        sizeCode=-1.0;
-        return 1;
-    }
-    return 2;
-}
-
-
-
-
-
 ///////////////////////////////////////////
 /// \brief ArucoMarker
 //////////////////////////////////////////////
 ArucoMarker::ArucoMarker()
 {
     flag3DReconstructed=false;
-    return;
 }
 
 aruco::Marker ArucoMarker::getMarker() const
@@ -255,13 +54,11 @@ int ArucoMarker::set3DReconstructed(bool flag3DReconstructed)
 ArucoEye::ArucoEye()
 {
     init();
-    return;
 }
 
 ArucoEye::~ArucoEye()
 {
     close();
-    return;
 }
 
 int ArucoEye::init()
@@ -269,8 +66,8 @@ int ArucoEye::init()
     flagNewImage=false;
     flagCameraParametersSet=false;
 
-    if(configureArucoDetector())
-        return 1;
+//    if(configureArucoDetector())
+//        return 1;
 
     return 0;
 }
@@ -281,7 +78,7 @@ int ArucoEye::close()
 }
 
 
-int ArucoEye::configure(std::string arucoListFile, std::string cameraParametersFile)
+int ArucoEye::configure(std::string & dictionary, std::string & cameraParametersFile)
 {
     int error=0;
 
@@ -291,16 +88,7 @@ int ArucoEye::configure(std::string arucoListFile, std::string cameraParametersF
         error=2;
     }
 
-    //Aruco List
-    if(setArucoList(arucoListFile))
-        error=3;
-
-
-    //Aruco Detector
-    if(configureArucoDetector())
-        error=3;
-
-
+    setDictionary(dictionary);
 
     return error;
 }
@@ -310,7 +98,7 @@ bool ArucoEye::isTheCameraParametersSet() const
     return this->flagCameraParametersSet;
 }
 
-int ArucoEye::setCameraParameters(std::string filename)
+int ArucoEye::setCameraParameters(std::string & filename)
 {
     if(filename.empty())
         return 2;
@@ -333,7 +121,7 @@ int ArucoEye::setCameraParameters(std::string filename)
 }
 
 
-int ArucoEye::setCameraParameters(aruco::CameraParameters camParam)
+int ArucoEye::setCameraParameters(aruco::CameraParameters & camParam)
 {
     TheCameraParameters=camParam;
     if(TheCameraParameters.isValid())
@@ -344,49 +132,11 @@ int ArucoEye::setCameraParameters(aruco::CameraParameters camParam)
     return 1;
 }
 
-
-int ArucoEye::setArucoList(std::string arucoListFile)
+int ArucoEye::setDictionary(std::string &dictionary)
 {
-    if(arucoListFile.empty())
-        return 2;
-    if ( !boost::filesystem::exists( arucoListFile ) )
-    {
-        std::cout << "Can't find the file: "<< arucoListFile << std::endl;
-        return 1;
-    }
-    else
-        return ArucoList.loadListFromXmlFile(arucoListFile);
-}
-
-
-//Configure ArucoDetector
-int ArucoEye::configureArucoDetector(aruco::MarkerDetector::ThresholdMethods thresholdMethod, double ThresParam1, double ThresParam2, aruco::MarkerDetector::CornerRefinementMethod methodCornerRefinement, float minSize, float maxSize)
-{
-
-    //Threshold
-    //Params
-    //MDetector.getThresholdParams( ThresParam1,ThresParam2);
-    MDetector.setThresholdParams(ThresParam1,ThresParam2);
-
-    //Method
-    //enum ThresholdMethods {FIXED_THRES,ADPT_THRES,CANNY};
-    MDetector.setThresholdMethod(thresholdMethod);
-    //ThresholdMethods = MDetector.getThresholdMethod();
-
-
-    //Corner refinement method
-    //enum CornerRefinementMethod {NONE,HARRIS,SUBPIX,LINES};
-    MDetector.setCornerRefinementMethod(methodCornerRefinement);
-
-
-    //Specifies the min and max sizes of the markers as a fraction of the image size. By size we mean the maximum of cols and rows.
-    //@param min size of the contour to consider a possible marker as valid (0,1]
-    //@param max size of the contour to consider a possible marker as valid [0,1)
-    MDetector.setMinMaxSize(minSize,maxSize);
-
+    MDetector.setDictionary(dictionary);
     return 0;
 }
-
 
 
 int ArucoEye::run(unsigned int &numCodesDetected, unsigned int &numCodesReconstructed)
@@ -400,7 +150,7 @@ int ArucoEye::run(unsigned int &numCodesDetected, unsigned int &numCodesReconstr
 
     //Detection of markers in the image passed
     std::vector<aruco::Marker> TheDetectedMarkers;
-    MDetector.detect(InputImage, TheDetectedMarkers);//,TheCameraParameters);
+    TheDetectedMarkers = MDetector.detect(InputImage);//,TheCameraParameters);
 
     //Count
     numCodesDetected=0;
@@ -408,45 +158,25 @@ int ArucoEye::run(unsigned int &numCodesDetected, unsigned int &numCodesReconstr
 
     TheMarkers.clear();
 
-    for(int i=0; i<TheDetectedMarkers.size(); i++)
+    for(auto & TheDetectedMarker : TheDetectedMarkers)
     {
-        //Code is in the list
-        if(ArucoList.isCodeByIdInList(TheDetectedMarkers[i].id))
+        ArucoMarker TheArucoMarker;
+        // 2D Detection
+        numCodesDetected++;
+        if(TheCameraParameters.isValid())
         {
-            ArucoMarker TheArucoMarker;
-
-            // 2D Detection
-            numCodesDetected++;
-
-            // 3D Reconstruction
-            //Code is in the list
-            if(ArucoList.isCodeWithSizeInList(TheDetectedMarkers[i].id))
-            {
-                if(TheCameraParameters.isValid())
-                {
-                    float theMarkerSize;
-                    if(!ArucoList.getCodeSizeById(theMarkerSize, TheDetectedMarkers[i].id))
-                    {
-                        TheDetectedMarkers[i].calculateExtrinsics(theMarkerSize,TheCameraParameters);
-                        TheArucoMarker.set3DReconstructed(true);
-                        numCodesReconstructed++;
-                    }
-                }
-#ifdef VERBOSE_ARUCO_EYE
-                else
-                    cout<<"[AE] Invalid camera parameters. Unable to reconstruct 3d"<<endl;
-#endif
-            }
-
-            // Push in the List
-            TheArucoMarker.setMarker(TheDetectedMarkers[i]);
-            TheMarkers.push_back(TheArucoMarker);
+        TheDetectedMarker.calculateExtrinsics(TheMarkerSize,TheCameraParameters);
+        TheArucoMarker.set3DReconstructed(true);
+        numCodesReconstructed++;
         }
+#ifdef VERBOSE_ARUCO_EYE
         else
-            continue;
+            cout<<"[AE] Invalid camera parameters. Unable to reconstruct 3d"<<endl;
+#endif
+        // Push in the List
+        TheArucoMarker.setMarker(TheDetectedMarker);
+        TheMarkers.push_back(TheArucoMarker);
     }
-
-
     flagNewImage=false;
 
     return 0;
@@ -468,9 +198,9 @@ int ArucoEye::drawDetectedArucoCodes(bool drawDetectedCodes, bool draw3DReconstr
     //print marker info and draw the markers in image
     if(drawDetectedCodes)
     {
-        for(unsigned int i=0;i<TheMarkers.size();i++)
+        for(auto & TheMarker : TheMarkers)
         {
-            TheMarkers[i].getMarker().draw(OutputImage,cv::Scalar(0,0,255),true);
+            TheMarker.getMarker().draw(OutputImage,cv::Scalar(0,0,255),true);
         }
     }
 
@@ -480,11 +210,11 @@ int ArucoEye::drawDetectedArucoCodes(bool drawDetectedCodes, bool draw3DReconstr
     {
         if(TheCameraParameters.isValid())
         {
-            for(unsigned int i=0;i<TheMarkers.size();i++)
+            for(auto & TheMarker : TheMarkers)
             {
-                if(TheMarkers[i].is3DReconstructed())
+                if(TheMarker.is3DReconstructed())
                 {
-                    aruco::Marker TheArucoMarker=TheMarkers[i].getMarker();
+                    aruco::Marker TheArucoMarker=TheMarker.getMarker();
                     //aruco::CvDrawingUtils::draw3dCube(OutputImage,TheMarkers[i],TheCameraParameters);
                     aruco::CvDrawingUtils::draw3dAxis(OutputImage, TheArucoMarker, TheCameraParameters);
                 }
@@ -554,6 +284,11 @@ int ArucoEye::addMarkerToMarkersList(ArucoMarker TheMarker)
 int ArucoEye::clearMarkersList()
 {
     this->TheMarkers.clear();
+    return 0;
+}
+
+int ArucoEye::setMarkerSize(float sizeInMeters) {
+    TheMarkerSize=sizeInMeters;
     return 0;
 }
 
