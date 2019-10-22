@@ -51,7 +51,7 @@ set(ARUCO_ROS_HEADER_FILES
 find_package(catkin REQUIRED
                 COMPONENTS roscpp message_filters image_transport cv_bridge geometry_msgs tf2 tf2_geometry_msgs tf2_ros perception_msgs robot_component_srvs aruco_eye_core)
 
-find_package(OpenCV 3.3 REQUIRED)
+find_package(OpenCV 3 REQUIRED)
 find_package(aruco REQUIRED)
 
 catkin_package(

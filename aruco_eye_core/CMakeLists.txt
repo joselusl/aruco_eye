@@ -49,7 +49,7 @@ set(ARUCO_EYE_CORE_HEADER_FILES
 
 find_package(catkin REQUIRED)
 
-find_package(OpenCV 3.3 REQUIRED)
+find_package(OpenCV 3 REQUIRED)
 
 find_package(aruco REQUIRED)
 
