@@ -50,7 +50,7 @@ public:
      *
      * If you want correction capabilities and not sure how much, use 0.5 in this parameter
      */
-    static cv::Ptr<MarkerLabeler> create(Dictionary::DICT_TYPES dict_type,float error_correction_rate=0)throw (cv::Exception);
+    static cv::Ptr<MarkerLabeler> create(Dictionary::DICT_TYPES dict_type,float error_correction_rate=0) throw(/*cv::Exception*/);
 
 
     /** Factory function that returns the desired detector
@@ -63,7 +63,7 @@ public:
      * SVM:
      * @return
      */
-    static cv::Ptr<MarkerLabeler> create(std::string detector,std::string params="")throw (cv::Exception);
+    static cv::Ptr<MarkerLabeler> create(std::string detector,std::string params="") throw(/*cv::Exception*/);
 
     /** function that identifies a marker.
      * @param in input image to analyze

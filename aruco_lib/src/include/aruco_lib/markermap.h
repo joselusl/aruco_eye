@@ -80,7 +80,7 @@ public:
     /**Loads from file
      * @param filePath to the config file
      */
-    MarkerMap(string filePath) throw(cv::Exception);
+    MarkerMap(string filePath) throw(/*cv::Exception*/);
 
     /**Indicates if the corners are expressed in meters
      */
@@ -90,7 +90,7 @@ public:
     bool isExpressedInPixels() const { return mInfoType == PIX; }
     /**converts the passed board into meters
      */
-    MarkerMap convertToMeters( float markerSize)throw (cv::Exception);
+    MarkerMap convertToMeters( float markerSize) throw(/*cv::Exception*/);
     //simple way of knowing which elements detected in an image are from this markermap
     //returns the indices of the elements in the vector 'markers' that belong to this set
     //Example: The set has the elements with ids 10,21,31,41,92
@@ -100,7 +100,7 @@ public:
 
     /**Returns the Info of the marker with id specified. If not in the set, throws exception
      */
-    const Marker3DInfo &getMarker3DInfo(int id) const throw(cv::Exception);
+    const Marker3DInfo &getMarker3DInfo(int id) const  throw(/*cv::Exception*/);
 
     /**Returns the index of the marker (in this object) with id indicated, if is in the vector
      */
@@ -112,21 +112,21 @@ public:
 
     /**Returns an image of this to be printed. This object must be in pixels @see isExpressedInPixels(). If not,please provide the METER2PIX conversion parameter
         */
-    cv::Mat getImage(float METER2PIX=0)const throw (cv::Exception);
+    cv::Mat getImage(float METER2PIX=0)const  throw(/*cv::Exception*/);
 
 
     /**Saves the board info to a file
     */
-    void saveToFile(string sfile) throw(cv::Exception);
+    void saveToFile(string sfile)  throw(/*cv::Exception*/);
     /**Reads board info from a file
     */
-    void readFromFile(string sfile) throw(cv::Exception);
+    void readFromFile(string sfile)  throw(/*cv::Exception*/);
 
 
 
     //calculates the camera location w.r.t. the map using the information provided
     //returns the <rvec,tvec>
-    pair<cv::Mat,cv::Mat> calculateExtrinsics(const std::vector<aruco::Marker> &markers ,float markerSize, cv::Mat CameraMatrix, cv::Mat Distorsion   ) throw(cv::Exception);
+    pair<cv::Mat,cv::Mat> calculateExtrinsics(const std::vector<aruco::Marker> &markers ,float markerSize, cv::Mat CameraMatrix, cv::Mat Distorsion   )  throw(/*cv::Exception*/);
 
     //returns string indicating the dictionary
     std::string getDictionary()const{return dictionary;}
@@ -151,10 +151,10 @@ private:
 private:
     /**Saves the board info to a file
     */
-    void saveToFile(cv::FileStorage &fs) throw(cv::Exception);
+    void saveToFile(cv::FileStorage &fs)  throw(/*cv::Exception*/);
     /**Reads board info from a file
     */
-    void readFromFile(cv::FileStorage &fs) throw(cv::Exception);
+    void readFromFile(cv::FileStorage &fs)  throw(/*cv::Exception*/);
 public:
     void toStream(std::ostream &str);
     void fromStream(std::istream &str);

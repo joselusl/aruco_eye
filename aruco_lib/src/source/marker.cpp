@@ -81,7 +81,7 @@ Marker::Marker(const std::vector< cv::Point2f > &corners, int _id) : std::vector
 /**
  *
 */
-void Marker::glGetModelViewMatrix(double modelview_matrix[16]) throw(cv::Exception) {
+void Marker::glGetModelViewMatrix(double modelview_matrix[16])  throw(/*cv::Exception*/) {
     // check if paremeters are valid
     bool invalid = false;
     for (int i = 0; i < 3 && !invalid; i++) {
@@ -136,7 +136,7 @@ void Marker::glGetModelViewMatrix(double modelview_matrix[16]) throw(cv::Excepti
 /****
  *
  */
-void Marker::OgreGetPoseParameters(double position[3], double orientation[4]) throw(cv::Exception) {
+void Marker::OgreGetPoseParameters(double position[3], double orientation[4])  throw(/*cv::Exception*/) {
 
     // check if paremeters are valid
     bool invalid = false;
@@ -228,14 +228,14 @@ void Marker::draw(Mat &in, Scalar color, int lineWidth, bool writeId) const {
         return;
     if (lineWidth==-1)//auto
         lineWidth= std::max(1.f,float(in.cols)/1000.f);
-    cv::line(in, (*this)[0], (*this)[1], color, lineWidth, CV_AA);
-    cv::line(in, (*this)[1], (*this)[2], color, lineWidth, CV_AA);
-    cv::line(in, (*this)[2], (*this)[3], color, lineWidth, CV_AA);
-    cv::line(in, (*this)[3], (*this)[0], color, lineWidth, CV_AA);
+    cv::line(in, (*this)[0], (*this)[1], color, lineWidth, cv::LINE_AA);
+    cv::line(in, (*this)[1], (*this)[2], color, lineWidth, cv::LINE_AA);
+    cv::line(in, (*this)[2], (*this)[3], color, lineWidth, cv::LINE_AA);
+    cv::line(in, (*this)[3], (*this)[0], color, lineWidth, cv::LINE_AA);
     auto p2=Point2f(2*lineWidth, 2*lineWidth);
-    cv::rectangle(in, (*this)[0] - p2, (*this)[0] + p2, Scalar(0, 0, 255, 255), lineWidth, CV_AA);
-    cv::rectangle(in, (*this)[1] - p2, (*this)[1] + p2, Scalar(0, 255, 0, 255), lineWidth, CV_AA);
-    cv::rectangle(in, (*this)[2] - p2, (*this)[2] + p2, Scalar(255, 0, 0, 255), lineWidth, CV_AA);
+    cv::rectangle(in, (*this)[0] - p2, (*this)[0] + p2, Scalar(0, 0, 255, 255), lineWidth, cv::LINE_AA);
+    cv::rectangle(in, (*this)[1] - p2, (*this)[1] + p2, Scalar(0, 255, 0, 255), lineWidth, cv::LINE_AA);
+    cv::rectangle(in, (*this)[2] - p2, (*this)[2] + p2, Scalar(255, 0, 0, 255), lineWidth, cv::LINE_AA);
     if (writeId) {
         char cad[100];
         sprintf(cad, "id=%d", id);
@@ -253,7 +253,7 @@ void Marker::draw(Mat &in, Scalar color, int lineWidth, bool writeId) const {
 
 /**
  */
-void Marker::calculateExtrinsics(float markerSize, const CameraParameters &CP, bool setYPerpendicular) throw(cv::Exception) {
+void Marker::calculateExtrinsics(float markerSize, const CameraParameters &CP, bool setYPerpendicular)  throw(/*cv::Exception*/) {
     if (!CP.isValid())
         throw cv::Exception(9004, "!CP.isValid(): invalid camera parameters. It is not possible to calculate extrinsics", "calculateExtrinsics", __FILE__,
                             __LINE__);
@@ -263,7 +263,7 @@ void Marker::calculateExtrinsics(float markerSize, const CameraParameters &CP, b
 void print(cv::Point3f p, string cad) { cout << cad << " " << p.x << " " << p.y << " " << p.z << endl; }
 /**
  */
-void Marker::calculateExtrinsics(float markerSizeMeters, cv::Mat camMatrix, cv::Mat distCoeff, bool setYPerpendicular) throw(cv::Exception) {
+void Marker::calculateExtrinsics(float markerSizeMeters, cv::Mat camMatrix, cv::Mat distCoeff, bool setYPerpendicular)  throw(/*cv::Exception*/) {
     if (!isValid())
         throw cv::Exception(9004, "!isValid(): invalid marker. It is not possible to calculate extrinsics", "calculateExtrinsics", __FILE__, __LINE__);
     if (markerSizeMeters <= 0)

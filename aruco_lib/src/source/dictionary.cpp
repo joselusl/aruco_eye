@@ -12,20 +12,20 @@
 using namespace std;
 namespace aruco{
 
-//void Dictionary::saveToFile(std::string file)throw(cv::Exception){
+//void Dictionary::saveToFile(std::string file) throw(/*cv::Exception*/){
 //    std::ofstream f(file.c_str(),std::ios::binary);
 //    if(!f) cv::Exception(9001, "Could not open file:"+file, "Dictionary::saveToFile", __FILE__, __LINE__);
 //     f<<"aruco_dictionary 1.0\n";
 //    saveToStream(f);
 //}
-//void Dictionary::saveToStream(std::ostream & str)throw(cv::Exception){
+//void Dictionary::saveToStream(std::ostream & str) throw(/*cv::Exception*/){
 //str<<_nbits<<" "<<_tau<<" "<<_code_id.size()<<std::endl;
 //    for(auto it:_code_id )
 //        str<<it.first<<" "<<it.second<<std::endl;
 
 
 //}
-//void Dictionary::readFromFile(std::string file)throw(cv::Exception){
+//void Dictionary::readFromFile(std::string file) throw(/*cv::Exception*/){
 //    std::ifstream f(file.c_str(),std::ios::binary);
 //    if(!f)cv::Exception(9001, "Could not open file:"+file, "Dictionary::readFromFile", __FILE__, __LINE__);
 //    string sig;sig.resize(16);
@@ -40,7 +40,7 @@ namespace aruco{
 
 
 
-//void Dictionary::readFromStream(std::istream &str)throw(cv::Exception){
+//void Dictionary::readFromStream(std::istream &str) throw(/*cv::Exception*/){
 //    uint64_t code;int id;
 //    _code_id.clear();
 //    uint64_t s;
@@ -51,14 +51,14 @@ namespace aruco{
 //    }
 //}
 
-Dictionary Dictionary::load(string info)throw(cv::Exception){
+Dictionary Dictionary::load(string info) throw(/*cv::Exception*/){
 if (isPredefinedDictinaryString(info))
     return loadPredefined(info);
 else return loadFromFile(info);
 }
 
 
-Dictionary Dictionary::loadFromFile(std::string path) throw(cv::Exception){
+Dictionary Dictionary::loadFromFile(std::string path)  throw(/*cv::Exception*/){
     auto getImage=[](uint64_t tag,int nbits){
         std::bitset<64> bs(tag);
         cv::Mat im(nbits,nbits,CV_8UC1);
@@ -114,14 +114,14 @@ void Dictionary::fromVector(const vector<uint64_t> &codes,std::map<uint64_t,uint
 	code_id_map.clear();
 	int id=0;
 	for(auto c:codes) 	code_id_map.insert( make_pair(c,id++));
-	
+
 }
-Dictionary Dictionary::loadPredefined(std::string type)throw(cv::Exception){
+Dictionary Dictionary::loadPredefined(std::string type) throw(/*cv::Exception*/){
 
     return loadPredefined(getTypeFromString(type));
 }
 
-Dictionary Dictionary::loadPredefined(DICT_TYPES type)throw (cv::Exception){
+Dictionary Dictionary::loadPredefined(DICT_TYPES type) throw(/*cv::Exception*/){
     Dictionary d;
     switch(type){
          case ARUCO:{
@@ -246,7 +246,7 @@ fromVector(codes,d._code_id);
         d._name="CHILITAGS";
 
     }break;
-    case CUSTOM: throw cv::Exception(-1,"CUSTOM type is only set by loading from file","Dictionary::loadPredefined","dictionary.h",-1);
+    case CUSTOM: /*throw cv::Exception(-1,"CUSTOM type is only set by loading from file","Dictionary::loadPredefined","dictionary.h",-1)*/;
         //    case ARUCO_MIP_100h40:{
 //        vector<uint64_t> codes={0xd17e611fb8bb5a76UL,0x8801dd030168715UL,0x82023c30aa99028UL,0x60115acacbf8d0d6UL,0xb2adb14ce02a6069UL,0x4fafc9da89fceea5UL,0xe30eefdd67fb0c19UL,0xde5b2b45bf0cffd9UL,0xf975e7601c5ac4acUL,0x7dc17bcd13a37127UL,0x41bdfe6f1d8e5fbcUL,0xa46db9b9c4c0be04UL,0xdbc0c1c7205d3815UL,0x113a26ec35f0b669UL,0x88a46dfccec57582UL,0x362207da9eae76b5UL,0x4f781c563f6cac1UL,0x8a31d5ea97194fe3UL,0x95364dc2814c38cbUL,0x2091e07dba943a15UL,0xebc964fa35c26553UL,0xfeb30eab42d21f89UL,0xa38f27d22369e7a6UL,0x966d13ec09d90754UL,0xa102a34b739464ceUL,0xe802964cff495b04UL,0x7134b5cb6002cf83UL,0x95c307f2dc9abf70UL,0xf9ebdc66d050cef3UL,0x642123f77d46d65aUL,0x1aedf747eb101982UL,0xc3bc6af5520deeabUL,0x36c2ffd924e069dfUL,0x4ee7aff6523c4c40UL,0x6a74394c7f94023bUL,0xe9f615ee337b919aUL,0x17d5aeea0895a3c6UL,0x3d09ebd4ab8c624aUL,0x61e6d3f2c762386aUL,0x4f6bd646280aba76UL,0x397a50d5038f6f00UL,0x9d55b689f2c36212UL,0x90bc9655717eb43cUL,0xff0229d96b93ab7dUL,0x3f64d363a48440f1UL,0xd2fba4d6061c5b37UL,0x741e4cf89ed87f5dUL,0xd73822c0d92742e1UL,0xf32b67c9bace8758UL,0x592f36d0f2c830b5UL,0xe07863d6cd537505UL,0x968e435dd395713cUL,0x70ea0dc16e5b50acUL,0xe2dd83c2a8c79a2aUL,0x6a42a7e9859bfe82UL,0x857273e5fb3b1591UL,0xa03cd378d0b007daUL,0x6611fe62550c1a5UL,0xf7caf3fc4892e8acUL,0x52f744d0e914e8aUL,0xae3cffc30770633dUL,0x48c664c399e4820cUL,0xd453284b15d562b1UL,0xd461c7ebecfe2980UL,0x395cde5fe42545fUL,0xac4e69662466f00fUL,0xb94c6e833307973eUL,0xafedb0b47f0621a5UL,0x5ba9cbe5c2ff26feUL,0xa10531f4004c35f5UL,0xda3e96e26f003eccUL,0xd53a6b7e860e21b2UL,0xa8f38eda492cfb8UL,0xd017b5c0fdf59573UL,0x524bb56e4cc8e3cUL,0x389b3aea1d0404a3UL,0x3e7e69cbe008fcbeUL,0xd8a252c641ade17fUL,0x65883fe3f3b23909UL,0x8ba7f197979c9899UL,0xe9b7af48de1c23cfUL,0x59d457ce8c9d44dbUL,0x7d090cf7d2fe224UL,0x3a2de3f3b15fe349UL,0x639726c511df00c5UL,0xb058b7fea1174abfUL,0x4266a3720fd88c97UL,0x2d4a7f129842d290UL,0x82c7dbd63a61c2f9UL,0x91e06e6aa4e757a9UL,0x6c0f86dd288ac865UL,0x4586c9f721957f02UL,0x56a884ccf54a2b9aUL,0x63e91bd5b9f9d052UL,0xa65e08d838f8a029UL,0xd091d571450a6401UL,0x6a124fc412dd5bf8UL,0x715f9473b15dadbeUL,0xeb99b6cb605cea05UL,0x63a953c8a5200e94UL,0xb6fe5cdefdc245f5UL,0xa82b35e905a631f4UL,0x978bf862d9d6302fUL,0xf3a79dfdb7879b8fUL,0x31dfc7d6fcb1f097UL,0x3265bac5cb1febb3UL,0xf0debbca9b080c20UL,0xa51573d1bfa2cb46UL,0x618a28da0a06714fUL,0x7ff827f676fba72eUL,0x359264c70acafcd5UL,0x357c92d781f001eaUL,0xcb671bdb40ce2bceUL,0x2d59cdf9791993f7UL,0x7460e9e21d240be1UL,0x72b64e496b295131UL,0x87c4854d34125d6eUL,0xb284a1c2d138de1cUL,0xc904f2cc94909331UL,0x228550cd3aa51008UL,0x4e71b0dfbaa457e8UL,0x2c399574cf48098bUL,0xcb3c57fb5080f49fUL,0xc45af7d83506f6c1UL,0x39d75edd4624e685UL,0x8cebc3e9764582a8UL,0x3cbb61c95fdd8d27UL,0x811c59e280927e2cUL,0xf35140ca37aab3fdUL,0x5ab49be9dcb93ee1UL,0x7f9cc1edefe9e898UL,0x74b527d7e0891b9eUL,0x75a82a50fc416416UL,0x9f0e07c855855827UL,0x7936ddc47786ed28UL,0x70cf8ffba780d77aUL,0xca273e91c10a87cUL,0xe5ea6df7e1cc842fUL,0x881515c9863b8effUL,0xfa5a5c5f1c1f95a5UL,0xa0f7ad7f4c877efUL,0xce208e2b393c6b7UL,0x4d918bcbf11789e8UL,0xdf74ad95a8090285UL,0xbaadcafd857830e2UL,0x22399ce3ce35909aUL,0x8e118059e40313a7UL,0x8cf152e5bdeaf61fUL,0xcab72cfed1caf9aaUL,0xbb3391d3c9c3e6b0UL,0x7e70ebcfa4e0226UL,0xa9b373db34ef0617UL,0xec7455c6dfd0aefcUL,0x7b52867ec9de2115UL,0x9354efdeba343237UL,0x4c90ec42081b1b83UL,0x5d212e6b5142f6e7UL,0xec6b07e1b209bba3UL,0x509abacc40d4531fUL,0xfb231a7513c2a144UL,0x2d4b93dc8e91b49eUL,0x7ddf25c1ebb40637UL,0x2ba2f25a8e8ac702UL,0x19d9bfe01f4f2b69UL,0xc6877fea67517c72UL,0x17f46bed59f3ef98UL,0x1f30b7f1ab14d037UL,0xa0c074012480d8bUL,0x27f259c4a901893fUL,0x9efca248229ad4dfUL,0xe7cce6fe69e13389UL,0x42b51ae12af28522UL,0xea4279e1486a6604UL,0xb2415ee8dde2d789UL,0x99d9d97382a6f3ccUL,0xe2d761aeaa18d706UL,0x3ed647e1b1672021UL,0x9c73f6d1d0923a6aUL,0xca5ede4bb1da1a13UL,0xbcf3dff3a3cc0504UL,0xe9cbf2c48b48bd1fUL,0x7824048c285827afUL,0x592f1fee5ee10b37UL,0x537fd8d851bf83a3UL,0x7ece81f3973a1306UL,0x35cee2c40dab5723UL,0x1907efee0318211dUL,0x231dbddefd5adec0UL,0x855ce2c0be5229d8UL,0x436b8ed9ffe52724UL,0xc6eacbcb0f3f11faUL,0x75105fe8c228b7b2UL,0xcb735dd026434019UL,0xe53d68d8bc1e9ea8UL,0xf57807df0067e09cUL,0x91d3cdcc0b520627UL,0xbb1ded19205c0132UL,0x71e0c6db73485ddfUL,0xc135fefe8c53d6cUL,0x48f374e5e5f477ddUL,0x37398df2730879f8UL,0xe20a80d5943ce67bUL,0xb7b73654a791c580UL,0x10aee17648fce5c9UL,0xedd778da012885e1UL,0x5306bc9b1b5267bcUL,0xd78e2fb6ac74823UL,0xf62c3f470ddec4eaUL,0xf738ece5b99240daUL,0x76bf2df18d23b7a9UL,0xd2e2d7cada4a4057UL,0x4a68dcc8ab55fa2fUL,0xba33ceb6b014e909UL,0x6a90ef57ed867d9cUL,0xdea8b6cd2ead718dUL,0xd9e99fc86ebaf10bUL,0xf5bd47c26b963856UL,0xb3fd90cf981f5694UL,0xe4f6d7612e1fffbfUL,0xc415bb6556e864c5UL,0xec465ac0e47503beUL,0x6e190b7804c43bc3UL,0x1b51c3d68c3b8e88UL,0xa2c264d05d207858UL,0xf439524c7256c5fbUL,0x4e187f4d788a2348UL,0x3012d7f32eacb11bUL,0x212b16a43d282a9UL,0xafe387cf87cb2e45UL,0x98a53fd6d2eb9245UL,0xa2475bfc37817d11UL,0xc7b33efa591d1154UL,0x86610f2bc4fdc13UL,0x121554f6f026e8c1UL,0xd4c545ff1abb468aUL,0xec8d0ba50993ce14UL,0x49ea27f58b0a4fd9UL,0x23350cd397d05f03UL,0x8d9300c7d1a59392UL,0x88fbb542e6a28570UL,0x882f4ee48b6b3788UL,0x5ec44a8ad11e6db1UL,0xa6982cc00316a91UL,0xc956215ee95610a8UL,0xad9e60fcdb429c19UL,0x1367f3570dd70215UL,0xd1d0d0842082c198UL,0x759a86fe17938db5UL,0xb17ef46069ce23b8UL,0xac93995ffa1a45d9UL};
 //        fromVector(codes,d._code_id);
@@ -261,7 +261,7 @@ fromVector(codes,d._code_id);
 //        d._tau=294;
 
 //    }break;
-    default:           throw cv::Exception(9001, "Invalid Dictionary type requested", "Dictionary::loadPredefined", __FILE__, __LINE__);
+    default:           /*throw cv::Exception(9001, "Invalid Dictionary type requested", "Dictionary::loadPredefined", __FILE__, __LINE__)*/;
 
      };
     return d;
@@ -308,7 +308,7 @@ cv::Mat Dictionary::getMarkerImage_id(int id,int bit_size,bool addWaterMark,bool
             sprintf(idcad, "#%d", id);
             float ax = float(A) / 100.;
             int linew = 1 + (img.rows / 500);
-            cv::putText(img, idcad, cv::Point(0, img.rows - img.rows / 40), cv::FONT_HERSHEY_COMPLEX, ax * 0.15f, cv::Scalar::all(30), linew,CV_AA);
+            cv::putText(img, idcad, cv::Point(0, img.rows - img.rows / 40), cv::FONT_HERSHEY_COMPLEX, ax * 0.15f, cv::Scalar::all(30), linew,cv::LINE_AA);
 
     }
     //
@@ -331,7 +331,7 @@ cv::Mat Dictionary::getMarkerImage_id(int id,int bit_size,bool addWaterMark,bool
 }
 
 
-std::string Dictionary::getTypeString(DICT_TYPES t)  throw(cv::Exception){
+std::string Dictionary::getTypeString(DICT_TYPES t)   throw(/*cv::Exception*/){
     switch(t){
     case ARUCO:return "ARUCO";break;
     case ARUCO_MIP_16h3:return "ARUCO_MIP_16h3";break;
@@ -348,11 +348,11 @@ std::string Dictionary::getTypeString(DICT_TYPES t)  throw(cv::Exception){
     case TAG36h10:return "TAG36h10";break;
     case CHILITAGS:return "CHILITAGS";break;
     case CUSTOM:return "CUSTOM";break;
-
    };
+   return "";
 }
 
-Dictionary::DICT_TYPES Dictionary::getTypeFromString(std::string str)   throw(cv::Exception){
+Dictionary::DICT_TYPES Dictionary::getTypeFromString(std::string str)    throw(/*cv::Exception*/){
     if (str=="ARUCO") return ARUCO;
     if (str=="ARUCO_MIP_16h3") return ARUCO_MIP_16h3;
     if (str=="ARUCO_MIP_25h7") return ARUCO_MIP_25h7;
@@ -372,7 +372,7 @@ Dictionary::DICT_TYPES Dictionary::getTypeFromString(std::string str)   throw(cv
 
  }
 
-bool Dictionary::isPredefinedDictinaryString(string str)  throw(cv::Exception){
+bool Dictionary::isPredefinedDictinaryString(string str)   throw(/*cv::Exception*/){
     try{
         getTypeFromString(str);
         return true;
@@ -387,7 +387,7 @@ return {   "ARUCO","ARUCO_MIP_16h3","ARUCO_MIP_25h7","ARUCO_MIP_36h12", "ARTOOLK
 
 }
 
-MarkerMap  Dictionary::createMarkerMap( cv::Size gridSize,int MarkerSize,int MarkerDistance, const std::vector<int> &ids,bool chess_board) throw (cv::Exception){
+MarkerMap  Dictionary::createMarkerMap( cv::Size gridSize,int MarkerSize,int MarkerDistance, const std::vector<int> &ids,bool chess_board)  throw(/*cv::Exception*/){
     if (gridSize.height*gridSize.width!=int(ids.size()))throw cv::Exception(9001, "gridSize != ids.size()Invalid ", "Dictionary::createMarkerMap", __FILE__, __LINE__);
     MarkerMap TInfo;
 
@@ -418,7 +418,7 @@ MarkerMap  Dictionary::createMarkerMap( cv::Size gridSize,int MarkerSize,int Mar
             for (int x=0;x<gridSize.width;x++) {
                 toWrite=!toWrite;
                 if (toWrite) {
-                    if (CurMarkerIdx>=int(ids.size())) throw cv::Exception(999," FiducidalMarkers::createMarkerMapImage_ChessMarkerMap","INTERNAL ERROR. REWRITE THIS!!",__FILE__,__LINE__);
+                    if (CurMarkerIdx>=int(ids.size())) /*throw cv::Exception(999," FiducidalMarkers::createMarkerMapImage_ChessMarkerMap","INTERNAL ERROR. REWRITE THIS!!",__FILE__,__LINE__)*/;
                     TInfo.push_back( Marker3DInfo(ids[CurMarkerIdx++]));
                     for(auto p:aruco::Marker::get3DPoints(MarkerSize))
                         TInfo.back().push_back(p+cv::Point3f(x*MarkerSize,y*MarkerSize,0) );

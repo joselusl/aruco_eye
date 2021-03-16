@@ -57,7 +57,7 @@ class   SVMMarkers: public MarkerLabeler {
     std::string getName()const{return "SVM";}
 
     //loads the svm file that detects the markers
-    bool load(std::string path="")throw (cv::Exception);
+    bool load(std::string path="")throw (/*cv::Exception*/);
     /**
      * Detect marker in a canonical image.
      * Return marker id in 0 rotation, or -1 if not found

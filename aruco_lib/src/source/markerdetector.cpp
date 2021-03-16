@@ -76,13 +76,13 @@ MarkerDetector::~MarkerDetector() {}
  *
  ************************************/
 
-std::vector<aruco::Marker> MarkerDetector::detect(const cv::Mat &input ) throw(cv::Exception) {
+std::vector<aruco::Marker> MarkerDetector::detect(const cv::Mat &input )  throw(/*cv::Exception*/) {
     std::vector< Marker >  detectedMarkers;
     detect(input,detectedMarkers);
     return detectedMarkers;
 }
 
-std::vector<aruco::Marker> MarkerDetector::detect(const cv::Mat &input,const CameraParameters &camParams, float markerSizeMeters , bool setYPerperdicular ) throw(cv::Exception){
+std::vector<aruco::Marker> MarkerDetector::detect(const cv::Mat &input,const CameraParameters &camParams, float markerSizeMeters , bool setYPerperdicular )  throw(/*cv::Exception*/){
     std::vector< Marker >  detectedMarkers;
     detect(input,detectedMarkers,camParams,markerSizeMeters,setYPerperdicular);
     return detectedMarkers;
@@ -96,7 +96,7 @@ std::vector<aruco::Marker> MarkerDetector::detect(const cv::Mat &input,const Cam
  *
  ************************************/
 void MarkerDetector::detect(const cv::Mat &input, std::vector< Marker > &detectedMarkers, CameraParameters camParams, float markerSizeMeters,
-                            bool setYPerpendicular) throw(cv::Exception) {
+                            bool setYPerpendicular)  throw(/*cv::Exception*/) {
     if ( camParams.CamSize!=input.size() && camParams.isValid() && markerSizeMeters>0){
         //must resize camera parameters if we want to compute properly marker poses
         CameraParameters cp_aux=camParams;
@@ -117,11 +117,11 @@ void MarkerDetector::detect(const cv::Mat &input, std::vector< Marker > &detecte
  *
  ************************************/
 void MarkerDetector::detect(const cv::Mat &input, vector< Marker > &detectedMarkers, Mat camMatrix, Mat distCoeff, float markerSizeMeters,
-                            bool setYPerpendicular) throw(cv::Exception) {
+                            bool setYPerpendicular)  throw(/*cv::Exception*/) {
 //omp_set_num_threads(1);
     // it must be a 3 channel image
     if (input.type() == CV_8UC3)
-        cv::cvtColor(input, grey, CV_BGR2GRAY);
+        cv::cvtColor(input, grey, cv::COLOR_BGR2GRAY);
     else
         grey = input;
 
@@ -224,7 +224,7 @@ void MarkerDetector::detect(const cv::Mat &input, vector< Marker > &detectedMark
 
 
           if (_params._cornerMethod == SUBPIX) {
-            cornerSubPix(grey, Corners, cvSize(_params._subpix_wsize, _params._subpix_wsize), cvSize(-1, -1), cvTermCriteria(CV_TERMCRIT_ITER | CV_TERMCRIT_EPS, 12, 0.005));
+            cornerSubPix(grey, Corners, cv::Size(_params._subpix_wsize, _params._subpix_wsize), cv::Size(-1, -1), cv::TermCriteria(cv::TermCriteria::MAX_ITER | cv::TermCriteria::EPS, 12, 0.005));
         }
         // copy back
         for (unsigned int i = 0; i < detectedMarkers.size(); i++)
@@ -320,7 +320,7 @@ void MarkerDetector::detectRectangles(vector< cv::Mat > &thresImgv, vector< Mark
         std::vector< std::vector< cv::Point > > contours2;
         cv::Mat thres2;
         thresImgv[img_idx].copyTo(thres2);
-        cv::findContours(thres2, contours2, hierarchy2, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
+        cv::findContours(thres2, contours2, hierarchy2, cv::RETR_LIST, cv::CHAIN_APPROX_NONE);
         vector< Point > approxCurve;
         /// for each contour, analyze if it is a paralelepiped likely to be the marker
         for (unsigned int i = 0; i < contours2.size(); i++) {
@@ -505,7 +505,7 @@ void  MarkerDetector::adpt_threshold_multi( const Mat &grey, std::vector<Mat> &o
  *
  *
  ************************************/
-void MarkerDetector::thresHold(int method, const Mat &grey, Mat &out, double param1, double param2) throw(cv::Exception) {
+void MarkerDetector::thresHold(int method, const Mat &grey, Mat &out, double param1, double param2)  throw(/*cv::Exception*/) {
 
     if (param1 == -1)
         param1 = _params._thresParam1;
@@ -516,7 +516,7 @@ void MarkerDetector::thresHold(int method, const Mat &grey, Mat &out, double par
         throw cv::Exception(9001, "grey.type()!=CV_8UC1", "MarkerDetector::thresHold", __FILE__, __LINE__);
     switch (method) {
     case FIXED_THRES:
-        cv::threshold(grey, out, param1, 255, CV_THRESH_BINARY_INV);
+        cv::threshold(grey, out, param1, 255, cv::THRESH_BINARY_INV);
         break;
     case ADPT_THRES: // currently, this is the best method
         // ensure that _thresParam1%2==1
@@ -547,7 +547,7 @@ void MarkerDetector::thresHold(int method, const Mat &grey, Mat &out, double par
  *
  *
  ************************************/
-bool MarkerDetector::warp(Mat &in, Mat &out, Size size, vector< Point2f > points) throw(cv::Exception) {
+bool MarkerDetector::warp(Mat &in, Mat &out, Size size, vector< Point2f > points)  throw(/*cv::Exception*/) {
 
     if (points.size() != 4)
         throw cv::Exception(9001, "point.size()!=4", "MarkerDetector::warp", __FILE__, __LINE__);
@@ -662,7 +662,7 @@ void setPointIntoImage(cv::Point &p, cv::Size s) {
  *
  *
  ************************************/
-bool MarkerDetector::warp_cylinder(Mat &in, Mat &out, Size size, MarkerCandidate &mcand) throw(cv::Exception) {
+bool MarkerDetector::warp_cylinder(Mat &in, Mat &out, Size size, MarkerCandidate &mcand)  throw(/*cv::Exception*/) {
 
     if (mcand.size() != 4)
         throw cv::Exception(9001, "point.size()!=4", "MarkerDetector::warp", __FILE__, __LINE__);
@@ -1045,10 +1045,10 @@ void MarkerDetector::drawApproxCurve(Mat &in, vector< Point > &contour, Scalar c
 
 void MarkerDetector::draw(Mat out, const vector< Marker > &markers) {
     for (unsigned int i = 0; i < markers.size(); i++) {
-        cv::line(out, markers[i][0], markers[i][1], cvScalar(255, 0, 0), 2, CV_AA);
-        cv::line(out, markers[i][1], markers[i][2], cvScalar(255, 0, 0), 2, CV_AA);
-        cv::line(out, markers[i][2], markers[i][3], cvScalar(255, 0, 0), 2, CV_AA);
-        cv::line(out, markers[i][3], markers[i][0], cvScalar(255, 0, 0), 2, CV_AA);
+        cv::line(out, markers[i][0], markers[i][1], cv::Scalar(255, 0, 0), 2, cv::LINE_AA);
+        cv::line(out, markers[i][1], markers[i][2], cv::Scalar(255, 0, 0), 2, cv::LINE_AA);
+        cv::line(out, markers[i][2], markers[i][3], cv::Scalar(255, 0, 0), 2, cv::LINE_AA);
+        cv::line(out, markers[i][3], markers[i][0], cv::Scalar(255, 0, 0), 2, cv::LINE_AA);
     }
 }
 /* Attempt to make it faster than in opencv. I could not :( Maybe trying with SSE3...
@@ -1124,18 +1124,18 @@ void MarkerDetector::findCornerMaxima(vector< cv::Point2f > &Corners, const cv::
 }
 
 
-void MarkerDetector::setMarkerLabeler(cv::Ptr<MarkerLabeler> detector)throw(cv::Exception){
+void MarkerDetector::setMarkerLabeler(cv::Ptr<MarkerLabeler> detector) throw(/*cv::Exception*/){
     markerIdDetector=detector;
     if (markerIdDetector->getBestInputSize()!=-1)setWarpSize(markerIdDetector->getBestInputSize());
 
 }
 
-void MarkerDetector::setDictionary(Dictionary::DICT_TYPES dict_type,float error_correction_rate)throw(cv::Exception){
+void MarkerDetector::setDictionary(Dictionary::DICT_TYPES dict_type,float error_correction_rate) throw(/*cv::Exception*/){
     markerIdDetector= MarkerLabeler::create(dict_type,error_correction_rate);
     if (markerIdDetector->getBestInputSize()!=-1)setWarpSize(markerIdDetector->getBestInputSize());
 }
 
-void MarkerDetector::setDictionary(string dict_type,float error_correction_rate)throw(cv::Exception){
+void MarkerDetector::setDictionary(string dict_type,float error_correction_rate) throw(/*cv::Exception*/){
     markerIdDetector= MarkerLabeler::create( dict_type,std::to_string(error_correction_rate));
     if (markerIdDetector->getBestInputSize()!=-1)setWarpSize(markerIdDetector->getBestInputSize());
 }

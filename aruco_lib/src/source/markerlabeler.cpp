@@ -4,7 +4,7 @@
 #endif
 #include "markerlabelers/dictionary_based.h"
 namespace aruco{
-cv::Ptr<MarkerLabeler> MarkerLabeler::create(Dictionary::DICT_TYPES dict_type,float error_correction_rate)throw (cv::Exception)
+cv::Ptr<MarkerLabeler> MarkerLabeler::create(Dictionary::DICT_TYPES dict_type,float error_correction_rate) throw(/*cv::Exception*/)
 {
     Dictionary dict=Dictionary::loadPredefined(dict_type);
     DictionaryBased *db=new DictionaryBased();
@@ -15,7 +15,7 @@ cv::Ptr<MarkerLabeler> MarkerLabeler::create(Dictionary::DICT_TYPES dict_type,fl
 
 
 
-cv::Ptr<MarkerLabeler> MarkerLabeler::create(std::string detector,std::string params)throw (cv::Exception){
+cv::Ptr<MarkerLabeler> MarkerLabeler::create(std::string detector,std::string params) throw(/*cv::Exception*/){
 (void)params;
     if (detector=="SVM"){
 #ifdef USE_SVM_LABELER

@@ -136,7 +136,7 @@ MarkerMapPoseTracker::MarkerMapPoseTracker(){
     _isValid=false;
 }
 
-void MarkerMapPoseTracker::setParams(const  CameraParameters &cam_params,const MarkerMap &msconf, float markerSize)throw(cv::Exception)
+void MarkerMapPoseTracker::setParams(const  CameraParameters &cam_params,const MarkerMap &msconf, float markerSize) throw(/*cv::Exception*/)
 {
 
     _msconf=msconf;

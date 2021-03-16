@@ -45,7 +45,7 @@ MarkerMap::MarkerMap() { mInfoType = NONE; }
 *
 *
 */
-MarkerMap::MarkerMap(string filePath) throw(cv::Exception) {
+MarkerMap::MarkerMap(string filePath)  throw(/*cv::Exception*/) {
     mInfoType = NONE;
     readFromFile(filePath);
 }
@@ -55,14 +55,14 @@ MarkerMap::MarkerMap(string filePath) throw(cv::Exception) {
 *
 *
 */
-void MarkerMap::saveToFile(string sfile) throw(cv::Exception) {
+void MarkerMap::saveToFile(string sfile)  throw(/*cv::Exception*/) {
 
     cv::FileStorage fs(sfile, cv::FileStorage::WRITE);
     saveToFile(fs);
 }
 /**Saves the board info to a file
 */
-void MarkerMap::saveToFile(cv::FileStorage &fs) throw(cv::Exception) {
+void MarkerMap::saveToFile(cv::FileStorage &fs)  throw(/*cv::Exception*/) {
     fs<<"aruco_bc_dict"<<dictionary;
     fs << "aruco_bc_nmarkers" << (int)size();
     fs << "aruco_bc_mInfoType" << (int)mInfoType;
@@ -86,7 +86,7 @@ void MarkerMap::saveToFile(cv::FileStorage &fs) throw(cv::Exception) {
 *
 *
 */
-void MarkerMap::readFromFile(string sfile) throw(cv::Exception) {
+void MarkerMap::readFromFile(string sfile)  throw(/*cv::Exception*/) {
     try {
         cv::FileStorage fs(sfile, cv::FileStorage::READ);
         readFromFile(fs);
@@ -98,7 +98,7 @@ void MarkerMap::readFromFile(string sfile) throw(cv::Exception) {
 
 /**Reads board info from a file
 */
-void MarkerMap::readFromFile(cv::FileStorage &fs) throw(cv::Exception) {
+void MarkerMap::readFromFile(cv::FileStorage &fs)  throw(/*cv::Exception*/) {
     int aux = 0;
     // look for the nmarkers
     if (fs["aruco_bc_nmarkers"].name() != "aruco_bc_nmarkers")
@@ -138,7 +138,7 @@ int MarkerMap::getIndexOfMarkerId(int id) const {
 
 /**
  */
-const Marker3DInfo &MarkerMap::getMarker3DInfo(int id) const throw(cv::Exception) {
+const Marker3DInfo &MarkerMap::getMarker3DInfo(int id) const  throw(/*cv::Exception*/) {
     for (size_t i = 0; i < size(); i++)
         if (at(i).id == id)
             return at(i);
@@ -146,7 +146,7 @@ const Marker3DInfo &MarkerMap::getMarker3DInfo(int id) const throw(cv::Exception
 }
 
 
-void  __glGetModelViewMatrix(double modelview_matrix[16],const cv::Mat &Rvec,const cv::Mat &Tvec) throw(cv::Exception) {
+void  __glGetModelViewMatrix(double modelview_matrix[16],const cv::Mat &Rvec,const cv::Mat &Tvec)  throw(/*cv::Exception*/) {
     // check if paremeters are valid
     bool invalid = false;
     for (int i = 0; i < 3 && !invalid; i++) {
@@ -200,7 +200,7 @@ void  __glGetModelViewMatrix(double modelview_matrix[16],const cv::Mat &Rvec,con
 /****
  *
  */
-void __OgreGetPoseParameters(double position[3], double orientation[4],const cv::Mat &Rvec,const cv::Mat &Tvec) throw(cv::Exception) {
+void __OgreGetPoseParameters(double position[3], double orientation[4],const cv::Mat &Rvec,const cv::Mat &Tvec)  throw(/*cv::Exception*/) {
     // check if paremeters are valid
     bool invalid = false;
     for (int i = 0; i < 3 && !invalid; i++) {
@@ -294,7 +294,7 @@ void MarkerMap::getIdList(std::vector< int > &ids, bool append) const {
         ids.push_back(at(i).id);
 }
 
-MarkerMap   MarkerMap::convertToMeters(float markerSize_meters)throw (cv::Exception){
+MarkerMap   MarkerMap::convertToMeters(float markerSize_meters) throw(/*cv::Exception*/){
 
     if (!isExpressedInPixels())
         throw cv::Exception(-1,"The board is not expressed in pixels",  "MarkerMap::convertToMeters", __FILE__, __LINE__);
@@ -311,7 +311,7 @@ MarkerMap   MarkerMap::convertToMeters(float markerSize_meters)throw (cv::Except
         }
     return BInfo;
 }
-cv::Mat MarkerMap::getImage(float METER2PIX)const throw (cv::Exception){
+cv::Mat MarkerMap::getImage(float METER2PIX)const  throw(/*cv::Exception*/){
 
     if (mInfoType==NONE)
         throw cv::Exception(-1,"The board is not valid mInfoType==NONE  ",  "MarkerMap::getImage", __FILE__, __LINE__);
@@ -386,7 +386,7 @@ void MarkerMap::fromStream(std::istream &str){
     for(size_t i=0;i<size();i++) at(i).fromStream(str);
     str>>dictionary;
 }
-pair<cv::Mat,cv::Mat> MarkerMap::calculateExtrinsics(const std::vector<aruco::Marker> &markers ,float markerSize, cv::Mat CameraMatrix, cv::Mat Distorsion   ) throw(cv::Exception){
+pair<cv::Mat,cv::Mat> MarkerMap::calculateExtrinsics(const std::vector<aruco::Marker> &markers ,float markerSize, cv::Mat CameraMatrix, cv::Mat Distorsion   )  throw(/*cv::Exception*/){
     vector<cv::Point2f> p2d;
     MarkerMap m_meters;
     if (isExpressedInPixels())

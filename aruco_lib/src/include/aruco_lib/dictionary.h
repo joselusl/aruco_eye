@@ -59,11 +59,11 @@ public:
     cv::Mat getMarkerImage_id(int id,int bit_size,bool addWaterMark=true,bool enclosed_corners=false);
 
     //used for boards
-    MarkerMap  createMarkerMap( cv::Size gridSize,int MarkerSize,int MarkerDistance, const std::vector<int> &Ids,bool chess_board=false) throw (cv::Exception);
+    MarkerMap  createMarkerMap( cv::Size gridSize,int MarkerSize,int MarkerDistance, const std::vector<int> &Ids,bool chess_board=false) throw (/*cv::Exception*/);
 
 
-    static Dictionary loadPredefined(DICT_TYPES type) throw(cv::Exception);
-    static Dictionary loadPredefined(std::string type) throw(cv::Exception);
+    static Dictionary loadPredefined(DICT_TYPES type) throw (/*cv::Exception*/);
+    static Dictionary loadPredefined(std::string type) throw (/*cv::Exception*/);
 
     /** loads a dictionary defined in a file
     * Please note that the parsing is very basic and you must be very strict.
@@ -82,20 +82,20 @@ public:
     * 111101010
     * 000001100
     */
-    static Dictionary loadFromFile(std::string path) throw(cv::Exception);
+    static Dictionary loadFromFile(std::string path) throw (/*cv::Exception*/);
 
     /**Loads a dictioanary using the string passed. If it is a string of the predefined dictionaries, then returns it.
      * Otherwise, tries to load from a file
       */
-    static Dictionary load(std::string info)throw(cv::Exception);
+    static Dictionary load(std::string info) throw(/*cv::Exception*/);
 
 
 
 //    //io functions
-//    void saveToFile(std::string file)throw(cv::Exception);
-//    void readFromFile(std::string file)throw(cv::Exception);
-//    void saveToStream(std::ostream & str)throw(cv::Exception);
-//    void readFromStream(std::istream &str)throw(cv::Exception);
+//    void saveToFile(std::string file) throw(/*cv::Exception*/);
+//    void readFromFile(std::string file) throw(/*cv::Exception*/);
+//    void saveToStream(std::ostream & str) throw(/*cv::Exception*/);
+//    void readFromStream(std::istream &str) throw(/*cv::Exception*/);
 
 
 
@@ -103,9 +103,9 @@ public:
     static uint64_t computeDictionaryDistance(const Dictionary &d);
 
     //given a string,returns the type
-    static DICT_TYPES getTypeFromString(std::string str)  throw(cv::Exception);
-    static std::string getTypeString(DICT_TYPES t)   throw(cv::Exception);
-    static bool isPredefinedDictinaryString(std::string str)  throw(cv::Exception);
+    static DICT_TYPES getTypeFromString(std::string str)   throw(/*cv::Exception*/);
+    static std::string getTypeString(DICT_TYPES t)    throw(/*cv::Exception*/);
+    static bool isPredefinedDictinaryString(std::string str)   throw(/*cv::Exception*/);
     static std::vector<std::string> getDicTypes() ;
 private:
 

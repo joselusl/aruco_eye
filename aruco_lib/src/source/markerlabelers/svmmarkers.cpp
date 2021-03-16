@@ -64,7 +64,7 @@ public:
 
 
     int getBestInputSize(){return _patchSize;}
-    bool load(string path)throw (cv::Exception){
+    bool load(string path)throw (/*cv::Exception*/){
     if (path.empty())return false;
 
 
@@ -114,7 +114,7 @@ public:
         if (in.type() == CV_8UC1)
             grey = in;
         else
-            cv::cvtColor(in, grey, CV_BGR2GRAY);
+            cv::cvtColor(in, grey, cv::COLOR_BGR2GRAY);
 
         // resize to svm path size
         cv::Mat greyResized;
@@ -160,7 +160,7 @@ SVMMarkers::SVMMarkers(){
     _impl=new impl::SVMMarkers;
 }
 
-bool SVMMarkers::load(string path)throw (cv::Exception){
+bool SVMMarkers::load(string path)throw (/*cv::Exception*/){
     return _impl->load(path);
 }
 

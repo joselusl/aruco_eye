@@ -89,7 +89,7 @@ public:
     //If the msconf has data expressed in meters, then the markerSize parameter is not required. If it is in pixels, the markersize will be used to
     //transform to meters
     //Throws exception if wrong configuraiton
-    void setParams(const  CameraParameters &cam_params,const MarkerMap &msconf, float markerSize=-1)throw(cv::Exception);
+    void setParams(const  CameraParameters &cam_params,const MarkerMap &msconf, float markerSize=-1) throw(/*cv::Exception*/);
     //indicates if the call to setParams has been successfull and this object is ready to call estimatePose
     bool isValid()const{return _isValid;}
     //estimates camera pose wrt the markermap
